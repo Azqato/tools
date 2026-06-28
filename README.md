@@ -2,7 +2,7 @@
 
 A collection of free, browser-based utilities. Every tool runs entirely client-side — no server, no build step, no dependencies.
 
-Live site: TBD (not yet deployed)
+Live site: https://azqato.github.io/tools/
 
 Full documentation: [/docs](./docs/)
 

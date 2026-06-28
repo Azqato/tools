@@ -159,7 +159,7 @@ The site exists with three working in-browser tools and three external tool link
 | v0.1.0 — Initial launch | 2026-06-27 | Complete |
 | v0.2.0 — Second tool batch | TBD | Planned |
 | v0.3.0 — Accessibility pass | TBD | Planned |
-| v1.0.0 — Public launch / deployment | TBD | Planned |
+| v1.0.0 — Public launch / deployment | 2026-06-27 | Complete |
 
 ### v0.1.0 feature breakdown (complete)
 
@@ -173,7 +173,7 @@ The site exists with three working in-browser tools and three external tool link
 ### v0.2.0 planned features
 
 - 2–3 additional tools from the Future list (exact tools TBD)
-- Live deployment to GitHub Pages or equivalent
+- Live deployment to GitHub Pages: https://azqato.github.io/tools/ (complete)
 
 ### v0.3.0 planned features
 
@@ -206,7 +206,7 @@ The site exists with three working in-browser tools and three external tool link
 |--------|--------|-----------|--------|
 | Organic search impressions | 500/month | 3 months post-launch | Google Search Console |
 | Click-through rate from search | ≥ 3% | 3 months post-launch | Google Search Console |
-| Referral traffic from Azqato's other properties | TBD after launch | — | Privacy-respecting analytics |
+| Referral traffic from Azqato's other properties | — | Ongoing | Privacy-respecting analytics |
 
 ### Engagement metrics
 
@@ -547,7 +547,7 @@ Visit the site, open a tool, and use it. The Markdown Editor renders your docume
 *"I was sick of pasting my content into tools I didn't trust, just to preview some Markdown or strip a UTM tag. Azqato's Tools does exactly what I need and nothing else — I closed the tab and my draft was gone from their servers, because there are no servers."*
 — Jordan K., content strategist and early user
 
-**Try it now:** Visit [Azqato's Tools] (URL TBD at launch).
+**Try it now:** Visit [Azqato's Tools](https://azqato.github.io/tools/).
 
 Azqato is an independent publisher and tool builder focused on financial research and practical web utilities. Azqato's existing tools — including a Nasdaq 100 Screener that grades every index company on the Azqato methodology, a Google Sheets-powered Net Worth Tracker, and a VIX-based portfolio allocation strategy — have been used by individual investors and personal finance enthusiasts since 2024.
 

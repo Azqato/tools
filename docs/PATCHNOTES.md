@@ -5,6 +5,15 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v0.1.4 — 2026-06-27
+
+### Changed
+- Site deployed to production: https://azqato.github.io/tools/
+- Updated `README.md` live site link from TBD to production URL
+- Updated `docs/PRD.md`: press release call-to-action URL, v1.0.0 roadmap milestone marked Complete, v0.2.0 deployment note marked complete, referral traffic metric set to Ongoing
+
+---
+
 ## v0.1.3 — 2026-06-27
 
 ### Changed
