@@ -5,6 +5,15 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v0.1.5 — 2026-06-27
+
+### Changed
+- Replaced topbar navigation on all four pages (`index.html`, `markdown-preview.html`, `favicon-downloader.html`, `link-cleaner.html`) with four site-wide links: Azqato, Projects, Tools, Support
+- Fixed stale `../index.html#tools` path in tool-page nav links left over from the `/tools/` directory move
+- Updated `docs/DESIGN.md` topbar section to document the new nav structure and link destinations
+
+---
+
 ## v0.1.4 — 2026-06-27
 
 ### Changed

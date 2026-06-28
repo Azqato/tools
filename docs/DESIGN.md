@@ -191,8 +191,9 @@ Changes:
 - Sticky, `z-index: 50`
 - Frosted glass: `backdrop-filter: blur(12px) saturate(160%)` + `color-mix` semi-transparent background
 - Height: `62px`
-- Contains: brand (logo + name), spacer, optional nav links, theme toggle icon button
-- Nav links carry `.hide-sm` to collapse on mobile
+- Contains: brand (logo + name), spacer, four nav links, theme toggle icon button
+- Nav links (in order): Azqato (`https://azqato.com/`), Projects (`https://azqato.com/projects`), Tools (`https://azqato.github.io/tools/`), Support (`https://azqato.github.io/support.html`)
+- All nav links carry `.hide-sm` to collapse on mobile (≤ 760px)
 - Theme toggle uses `data-theme-toggle` attribute (no class needed) — `common.js` handles the click event
 
 ### Brand / Logo
