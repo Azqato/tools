@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link Cleaner — Azqato's Tools</title>
+  <meta name="description" content="Remove tracking parameters like utm_, fbclid and gclid from any URL, entirely in your browser." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
+      <div class="spacer"></div>
+      <a class="nav-link hide-sm" href="../index.html#tools">All tools</a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="page wrap">
+    <div class="page-head">
+      <div class="crumb"><a href="index.html">Tools</a> / Link Cleaner</div>
+      <h1>Link Cleaner</h1>
+      <p>Paste a URL and we'll strip out tracking parameters (utm_, fbclid, gclid and dozens more) so you can share a clean, private link.</p>
+    </div>
+
+    <div style="max-width:760px;">
+      <label class="lbl" for="lc-input">URL to clean</label>
+      <textarea id="lc-input" class="field" rows="3" spellcheck="false"
+        placeholder="https://example.com/article?utm_source=newsletter&utm_medium=email&fbclid=abc123"></textarea>
+
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+        <button class="btn primary" id="lc-clean">Clean link</button>
+        <button class="btn" id="lc-paste">Paste from clipboard</button>
+        <button class="btn ghost" id="lc-sample">Try an example</button>
+      </div>
+
+      <div class="lc-result" id="lc-result">
+        <label class="lbl" style="margin-top:22px;">Cleaned URL</label>
+        <div class="lc-out" id="lc-out"></div>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn sm primary" id="lc-copy">Copy clean link</button>
+          <button class="btn sm" id="lc-open">Open link</button>
+        </div>
+        <div class="stat-line" id="lc-stat"></div>
+        <div class="lc-removed" id="lc-removed"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© <span class="year"></span> Azqato's Tools</span>
+      <div class="spacer"></div>
+      <a href="index.html">Home</a>
+      <span style="color:var(--text-faint)">Your links never leave your device</span>
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script src="js/linkcleaner.js"></script>
+  <script>
+    var input = document.getElementById("lc-input");
+    var resultBox = document.getElementById("lc-result");
+    var out = document.getElementById("lc-out");
+    var stat = document.getElementById("lc-stat");
+    var removedBox = document.getElementById("lc-removed");
+    var current = "";
+
+    var EXAMPLE = "https://shop.example.com/products/widget?utm_source=facebook&utm_medium=cpc&utm_campaign=summer&fbclid=IwAR2x9&gclid=Cj0kxyz&color=blue&size=l&ref_src=twsrc";
+
+    function run() {
+      var res = cleanUrl(input.value);
+      if (!res || !res.valid) {
+        resultBox.classList.remove("show");
+        if (input.value.trim()) toast("That doesn't look like a valid URL");
+        return;
+      }
+      current = res.clean;
+      out.textContent = res.clean;
+
+      var n = res.removed.length;
+      stat.innerHTML = n
+        ? "Removed <b>" + n + "</b> tracking parameter" + (n === 1 ? "" : "s") +
+          ", kept <b>" + res.kept.length + "</b>."
+        : "This link was already clean — nothing to remove. ";
+
+      removedBox.innerHTML = "";
+      res.removed.forEach(function (r) {
+        var chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = r.key;
+        chip.title = r.key + " = " + r.value;
+        removedBox.appendChild(chip);
+      });
+      res.kept.forEach(function (k) {
+        var chip = document.createElement("span");
+        chip.className = "chip kept";
+        chip.textContent = k + " (kept)";
+        removedBox.appendChild(chip);
+      });
+
+      resultBox.classList.add("show");
+    }
+
+    document.getElementById("lc-clean").onclick = run;
+    input.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") run();
+    });
+
+    document.getElementById("lc-copy").onclick = function () {
+      copyText(current, "Clean link copied");
+    };
+    document.getElementById("lc-open").onclick = function () {
+      if (current) window.open(current, "_blank", "noopener");
+    };
+    document.getElementById("lc-sample").onclick = function () {
+      input.value = EXAMPLE; run();
+    };
+    document.getElementById("lc-paste").onclick = function () {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(function (t) {
+          input.value = t; run();
+        }).catch(function () { toast("Couldn't read clipboard — paste manually"); });
+      } else {
+        toast("Clipboard not available — paste manually");
+      }
+    };
+
+    document.querySelectorAll(".year").forEach(function (el) {
+      el.textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>

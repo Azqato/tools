@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Favicon Downloader — Azqato's Tools</title>
+  <meta name="description" content="Download any website's favicon in multiple sizes, right from your browser." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
+      <div class="spacer"></div>
+      <a class="nav-link hide-sm" href="../index.html#tools">All tools</a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="page wrap">
+    <div class="page-head">
+      <div class="crumb"><a href="index.html">Tools</a> / Favicon Downloader</div>
+      <h1>Favicon Downloader</h1>
+      <p>Enter any website and grab its favicon in a range of sizes. Preview them, download as PNG, or copy the direct image link.</p>
+    </div>
+
+    <form id="fav-form" class="input-row" style="max-width:640px;">
+      <input id="fav-input" class="field" type="text" autocomplete="off"
+             placeholder="e.g. github.com or https://stripe.com" />
+      <button class="btn primary" type="submit">Get favicons</button>
+    </form>
+
+    <div id="fav-results">
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <p>Enter a domain above to fetch its favicons.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© <span class="year"></span> Azqato's Tools</span>
+      <div class="spacer"></div>
+      <a href="index.html">Home</a>
+      <span style="color:var(--text-faint)">Icons via Google's public favicon service</span>
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    var form = document.getElementById("fav-form");
+    var input = document.getElementById("fav-input");
+    var results = document.getElementById("fav-results");
+    var SIZES = [16, 32, 48, 64, 128, 256];
+
+    function normalizeDomain(raw) {
+      var v = raw.trim();
+      if (!v) return null;
+      // strip protocol & path, keep host
+      v = v.replace(/^[a-z]+:\/\//i, "").replace(/\/.*$/, "").replace(/^www\./i, "");
+      if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(v)) return null;
+      return v.toLowerCase();
+    }
+
+    function faviconUrl(domain, size) {
+      return "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON" +
+             "&fallback_opts=TYPE,SIZE,URL&size=" + size +
+             "&url=" + encodeURIComponent("https://" + domain);
+    }
+
+    function download(url, name) {
+      fetch(url, { mode: "cors" })
+        .then(function (r) { if (!r.ok) throw new Error(); return r.blob(); })
+        .then(function (blob) {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = name;
+          a.click();
+          URL.revokeObjectURL(a.href);
+          toast("Downloaded " + name);
+        })
+        .catch(function () {
+          window.open(url, "_blank", "noopener");
+          toast("Opened in a new tab — right-click to save");
+        });
+    }
+
+    function render(domain) {
+      results.innerHTML = "";
+      var grid = document.createElement("div");
+      grid.className = "fav-grid";
+
+      SIZES.forEach(function (size) {
+        var url = faviconUrl(domain, size);
+        var item = document.createElement("div");
+        item.className = "fav-item";
+
+        var thumb = document.createElement("div");
+        thumb.className = "thumb";
+        var img = document.createElement("img");
+        img.src = url;
+        img.alt = domain + " favicon " + size + "px";
+        img.width = Math.min(size, 84);
+        img.height = Math.min(size, 84);
+        img.loading = "lazy";
+        img.onerror = function () {
+          thumb.innerHTML = '<span style="color:var(--text-faint);font-size:.8rem">n/a</span>';
+        };
+        thumb.appendChild(img);
+
+        var name = domain.replace(/\./g, "_") + "_" + size + ".png";
+        item.appendChild(thumb);
+        item.insertAdjacentHTML("beforeend",
+          '<div class="sz">' + size + " &times; " + size + "</div>" +
+          '<div class="src">PNG</div>');
+
+        var dl = document.createElement("button");
+        dl.className = "btn sm primary";
+        dl.style.width = "100%";
+        dl.textContent = "Download";
+        dl.onclick = function () { download(url, name); };
+        item.appendChild(dl);
+
+        var copy = document.createElement("button");
+        copy.className = "btn sm ghost";
+        copy.style.cssText = "width:100%;margin-top:6px;";
+        copy.textContent = "Copy link";
+        copy.onclick = function () { copyText(url, "Image link copied"); };
+        item.appendChild(copy);
+
+        grid.appendChild(item);
+      });
+
+      var head = document.createElement("p");
+      head.className = "section-label";
+      head.style.marginTop = "10px";
+      head.innerHTML = "Favicons for <span style='color:var(--accent)'>" + domain + "</span>";
+      results.appendChild(head);
+      results.appendChild(grid);
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var domain = normalizeDomain(input.value);
+      if (!domain) {
+        toast("Please enter a valid domain, e.g. example.com");
+        return;
+      }
+      render(domain);
+    });
+
+    document.querySelectorAll(".year").forEach(function (el) {
+      el.textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>
