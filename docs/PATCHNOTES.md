@@ -5,6 +5,16 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v0.1.6 — 2026-06-27
+
+### Changed
+- Centered the "Why these tools?" box on the landing page (`margin: 0 auto` on the card)
+- Equalized vertical spacing around the about section: top and bottom padding both set to `60px`
+- Footer navigation updated to mirror the topbar: Azqato, Projects, Tools, Support (with matching href destinations)
+- Removed "Built with Claude Code" credit from the footer
+
+---
+
 ## v0.1.5 — 2026-06-27
 
 ### Changed
