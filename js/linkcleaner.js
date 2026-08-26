@@ -1,4 +1,4 @@
-/* Link Cleaner — strips known tracking parameters from URLs. Pure client-side. */
+/* Link Cleaner - strips known tracking parameters from URLs. Pure client-side. */
 (function () {
   // Exact param names to always remove
   var EXACT = new Set([

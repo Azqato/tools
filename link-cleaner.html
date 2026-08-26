@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Link Cleaner — Azqato's Tools</title>
+  <title>Link Cleaner - Azqato's Tools</title>
   <meta name="description" content="Remove tracking parameters like utm_, fbclid and gclid from any URL, entirely in your browser." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
   <link rel="stylesheet" href="css/style.css" />
@@ -90,7 +90,7 @@
       stat.innerHTML = n
         ? "Removed <b>" + n + "</b> tracking parameter" + (n === 1 ? "" : "s") +
           ", kept <b>" + res.kept.length + "</b>."
-        : "This link was already clean — nothing to remove. ";
+        : "This link was already clean, nothing to remove. ";
 
       removedBox.innerHTML = "";
       res.removed.forEach(function (r) {
@@ -128,9 +128,9 @@
       if (navigator.clipboard && navigator.clipboard.readText) {
         navigator.clipboard.readText().then(function (t) {
           input.value = t; run();
-        }).catch(function () { toast("Couldn't read clipboard — paste manually"); });
+        }).catch(function () { toast("Couldn't read clipboard, paste manually"); });
       } else {
-        toast("Clipboard not available — paste manually");
+        toast("Clipboard not available, paste manually");
       }
     };
 

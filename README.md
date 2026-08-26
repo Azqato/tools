@@ -1,122 +1,86 @@
 # Azqato's Tools
 
-A collection of free, browser-based utilities. Every tool runs entirely client-side — no server, no build step, no dependencies.
+A collection of free web tools that run entirely inside your browser. You open a
+page, use the tool, and close the tab. Nothing you type is uploaded, and there is
+nothing to install or sign up for.
 
-Live site: https://azqato.github.io/tools/
-
-Full documentation: [/docs](./docs/)
-
----
-
-## Tech stack
-
-| Layer | Technology | Version / Notes |
-|-------|-----------|-----------------|
-| Markup | HTML5 | Semantic, no template engine |
-| Styles | CSS3 | Custom properties, no framework |
-| Logic | JavaScript | ES5 + modern APIs (URL, Clipboard, Blob, localStorage) |
-| Build | None | Files served as-is |
-| Hosting | Static file host | GitHub Pages or equivalent |
-
-No Node, no npm, no bundler. There is nothing to install.
+**Live site:** https://azqato.github.io/tools/
 
 ---
 
-## Prerequisites
+## What the site offers
 
-- Any modern browser (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
-- A static file server for local development (optional — files open directly from disk)
+The site is a single landing page listing every tool, plus one page per tool. Three
+tools are built and hosted here. Four more are Azqato projects that live on their own
+sites and are linked from the same list, marked "external".
 
-There is no Node version requirement because there is no Node dependency.
+### Built and hosted here
 
----
+**Markdown Editor**
+Write Markdown in the left pane and watch it render in the right pane as you type. It
+handles headings, bold and italic, strikethrough, code blocks, links, images, lists,
+checklists, quotes, and tables. A formatting toolbar inserts the syntax for you if you
+would rather not remember it. When you are finished you can copy the finished HTML or
+download the file as `.md`. Your draft is saved in your own browser, so closing the tab
+by accident does not lose your work.
 
-## Installation
+**Favicon Downloader**
+Type any website address and get its icon back in six sizes, from 16 pixels up to 256.
+Preview them all, then download the one you want as a PNG or copy a direct link to it.
+Useful for mockups, slide decks, documentation, and link previews.
 
-```bash
-git clone <repo-url>
-cd tools
-```
+**Link Cleaner**
+Paste a link that is cluttered with tracking codes, the `utm_source`, `fbclid`, and
+`gclid` fragments that get attached when you copy a link from an email or a social
+post, and get back a clean version you can share. The tool shows you exactly which
+parts it removed and which it kept, so you can check that nothing you needed was
+stripped out. The link never leaves your device; the cleaning happens in your browser.
 
-That is the entire installation. No `npm install`, no `.env`, no config files.
+### Linked from here, hosted elsewhere
 
----
+**Nasdaq 100 Screener** - grades every company in the Nasdaq 100 against the Azqato
+methodology across growth, valuation, profitability, and financial health, and marks
+each one Pass, Watch, or Fail.
 
-## Running locally
+**Net Worth Tracker** - a Google Sheets template plus a browser view that turns your
+account balances into trends and an asset allocation breakdown over time.
 
-**Option 1 — open directly (simplest):**
-Double-click `index.html`. All pages work from the local filesystem.
+**VIX Strategy** - a rules-based system that shifts an allocation between leveraged
+growth ETFs and safer assets according to current market volatility.
 
-**Option 2 — local HTTP server (avoids any browser CORS restrictions):**
-
-Using Python (built into macOS/Linux):
-```bash
-python3 -m http.server 8080
-# then open http://localhost:8080
-```
-
-Using Node (if available):
-```bash
-npx serve .
-# then open http://localhost:3000
-```
-
-Default port depends on the server you choose. No port is hardcoded in the project.
-
----
-
-## Environment variables
-
-None. There are no environment variables. No secrets are used. The only external network call is the Google Favicon service used by the Favicon Downloader tool, and that URL is hardcoded in `favicon-downloader.html`.
+**Protein Tracker** - logs daily calories and protein against targets you set, and
+exports to Excel. Like the tools on this site, it keeps your data on your device.
 
 ---
 
-## Build and deploy
+## Who it is for
 
-There is no build step. The output is identical to the source.
+Anyone who needs a quick utility and does not want to hand their text or their links
+to a website they have no reason to trust. That includes developers checking how a
+README will render, writers drafting in Markdown, marketers cleaning up campaign
+links before sharing them, and designers collecting icons. It also serves readers who
+already follow Azqato's financial tools and want them collected in one place.
 
-**To deploy:**
-1. Copy the entire project directory to any static file host.
-2. The entry point is `index.html` at the root.
-
-**GitHub Pages:**
-```bash
-git push origin main
-# enable GitHub Pages in repo settings, set source to main branch / root
-```
-
-**Any other host (Netlify, Vercel, Cloudflare Pages):**
-Set publish directory to `/` (repo root). No build command required.
+No account is required, nothing costs anything, and the Markdown Editor and Link
+Cleaner keep working with the network switched off. The Favicon Downloader is the one
+exception: it needs a connection, because it asks a public icon service for the images.
 
 ---
 
-## Project structure
+## Current status
 
-```
-/
-├── README.md
-├── index.html              ← Landing page / tool directory
-├── css/
-│   └── style.css           ← Shared design system
-├── js/
-│   ├── common.js           ← Theme toggle, toast, clipboard helper
-│   ├── markdown.js         ← Custom Markdown → HTML parser
-│   └── linkcleaner.js      ← Tracking-param stripper
-├── markdown-preview.html       ← Markdown Editor tool
-├── favicon-downloader.html     ← Favicon Downloader tool
-├── link-cleaner.html           ← Link Cleaner tool
-└── docs/
-    ├── PRD.md
-    ├── DESIGN.md
-    └── PATCHNOTES.md
-```
+Live and actively developed. Three in-browser tools are finished and working, and new
+ones are added when they can meet the same standard: useful, fast, and doing all their
+work on your device rather than someone's server.
 
 ---
 
-## Documentation
+## Where to learn more
 
-See [/docs](./docs/) for:
+Everything technical lives in [/docs](./docs/):
 
-- [PRD.md](./docs/PRD.md) — product requirements, roadmap, runbook, technical spec, security, press release, FAQ
-- [DESIGN.md](./docs/DESIGN.md) — color tokens, typography, spacing, component patterns, accessibility
-- [PATCHNOTES.md](./docs/PATCHNOTES.md) — versioned changelog
+- [PRD.md](./docs/PRD.md) - what the product is, who it serves, how it is built, how
+  to run and deploy it, the conventions it follows, and the decisions behind it
+- [DESIGN.md](./docs/DESIGN.md) - colors, typography, spacing, component rules, and
+  accessibility standards
+- [PATCHNOTES.md](./docs/PATCHNOTES.md) - the versioned record of every change
