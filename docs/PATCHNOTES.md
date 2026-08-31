@@ -5,6 +5,103 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v1.2.0 - 2026-08-31
+
+The **Wash Sale Tracker**, the fifth hosted tool and the first in the finance domain,
+where every Azqato finance tool until now has been an external card on the landing page.
+It is also the first tool that owns a collection of the user's records rather than
+transforming a single input.
+
+### Added
+- Added the Wash Sale Tracker at `wash-sale-tracker.html`. Enter a ticker and the date
+  traded, and the tool counts the 30 day window forward. Active Wash Sales lists windows
+  still running with the trade date, the expiry date, and the days remaining; Expired
+  Wash Sales holds the same rows once their date has passed
+- Added `js/washsale.js`, exporting `window.washSale`. Like the other three tool modules
+  it is a single IIFE that never touches the DOM, so every function is pure. It exports
+  `isValidDate`, `addDays`, `daysBetween`, `today`, `expiryOf`, `normalizeTicker`,
+  `classify`, and the `WINDOW_DAYS` constant
+- Added the `azqato-ws-records` `localStorage` key, the project's fourth and the first
+  holding a collection rather than a single value. It is the first to carry a schema
+  version, stored as `{ v: 1, records: [...] }`. Changing the record shape means bumping
+  `v` and reading the old shape before writing the new one
+- Added a days-remaining pill that is neutral by default, amber under a week, and
+  `--danger` in the last two days, reading "last day" on the final day rather than
+  "0 days left"
+- Added a remove button to every row, with an accessible name naming the ticker and the
+  trade date rather than a bare "Remove", so the buttons are distinguishable when read
+  out of context
+- Added a "Clear expired" action that appears only when there is something to clear,
+  names the count in its confirm, and never touches active windows
+- Added a `.ws-table` component and a Data tables section to `docs/DESIGN.md`, with two
+  rules for the next table: row borders rather than row backgrounds, and at most one
+  coloured thing per row
+- Added two checks to the audit harness, since this is the project's first table: every
+  table must have a `<th>`, and every `<th>` must carry `scope`
+
+### Changed
+- Changed the landing grid from eight cards to nine, and the README from four hosted
+  tools to five
+- Changed the Wash Sale Tracker milestone in `docs/PRD.md` from five open design
+  questions to five answered ones, each recorded with its reasoning rather than deleted
+- Changed the public surface list in `docs/PRD.md` from three `localStorage` keys to
+  four, with a note that the new one cannot be treated like the others: it holds a
+  collection and a schema version, so a change to its record shape is a migration rather
+  than a rename
+
+### Decisions recorded
+- **The expiry date is the trade date plus 30 days, and the backward half of the rule is
+  deliberately not modelled.** The US wash sale rule runs 30 days either side of a sale,
+  a 61 day window. By the time a user logs a trade, the backward half is already history,
+  so modelling it would add a column that can never change. The page says which half it
+  covers in plain words, because a tool that silently covers half a rule is worse than
+  one that says which half
+- **A window that expires today is still active.** Day 30 is the last day the rule bites
+  and it is clear from day 31, so `classify` treats `daysLeft >= 0` as active. This is
+  the boundary most likely to be got wrong by a later edit and it has two assertions
+  guarding it from either side
+- **Active versus expired is computed at render time and never stored,** as the v1.0.1
+  note required. A stored flag would go stale the moment a tab was left open overnight
+- **Every date is a plain `YYYY-MM-DD` string and no `Date` object ever escapes the two
+  helpers in `washsale.js`.** `new Date("2026-08-31")` parses as UTC midnight while
+  `new Date(2026, 7, 31)` parses as local midnight, so mixing them shows the wrong day to
+  anyone west of Greenwich for part of every day. All arithmetic runs through `Date.UTC`,
+  which additionally has no daylight saving, so no day is ever 23 or 25 hours long. The
+  one place local getters are correct is `today()`, because the user's today is a local
+  question, and that is commented in the source as the exception it is
+- **Corrupt storage costs the user their history, not the page.** `load()` returns an
+  empty list on a parse failure or a schema mismatch instead of throwing, so a truncated
+  or hand-edited value leaves a working tool with an empty table rather than a blank page
+
+### Fixed
+- Nothing. No existing behaviour changed
+
+### Removed
+- Nothing
+
+### Verification
+- 45 assertions against `js/washsale.js` in headless Edge, all passing. Date validation
+  including 30 February, 29 February in a leap and a non-leap year, month 13, and a
+  non-ISO shape. Arithmetic across month ends, year ends, both leap year boundaries, and
+  both 2026 US daylight saving transitions, in each direction. Ticker normalisation
+  including case, dots, hyphens, punctuation stripping, truncation, and a non-string
+  argument. Classification against a **fixed reference date**, so the suite can never
+  pass or fail depending on the day it is run, covering the expiry-day boundary from both
+  sides, invalid records being dropped, sort order in both tables, and empty and `null`
+  input
+- 29 assertions against the page itself, loaded in an iframe and driven through its real
+  DOM rather than a reimplementation: the date defaulting to today, both empty states,
+  adding a record, uppercasing on entry, the counts, the pill text at 30 days and on the
+  last day, the day 30 and day 31 boundary landing in different tables, rejection of an
+  empty ticker and an empty date, the stored schema version and shape, removing a row and
+  its persistence, clearing expired leaving active untouched, and a deliberately corrupted
+  storage value still producing a working page
+- The structural accessibility audit passes clean on all six pages
+- No em dashes in any new or modified file, in any of the three prohibited forms
+- Both harnesses were deleted before committing
+
+---
+
 ## v1.1.0 - 2026-08-31
 
 Platform work, no new tools. Two items that had each been deferred behind a stated

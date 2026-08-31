@@ -163,6 +163,7 @@ scope by definition.
 | Site-wide navigation shared with other Azqato properties | v0.1.5 | all five pages |
 | Protein Tracker external card | v0.1.7 | `index.html` |
 | Character Counter: live character, word, sentence, paragraph and line counts, reading and speaking time estimates, six platform limit bars, draft autosave, copy stats | v0.2.0 | `character-counter.html`, `js/charactercounter.js` |
+| Wash Sale Tracker: ticker and trade date entry, 30 day window counted forward, active and expired tables, days-remaining urgency pill, per-row remove, clear expired behind a confirm, versioned collection storage | v1.2.0 | `wash-sale-tracker.html`, `js/washsale.js` |
 
 ### Future, post-launch, unordered
 
@@ -183,12 +184,6 @@ Tool candidates, all of which must be buildable with zero dependencies:
   format back so the result can be imported into Chrome again. The collection is held in
   browser storage on the user's own device, so the tool never sees a server. Scope,
   constraints, and the open questions on it are set out in the milestone breakdown below
-- **Wash Sale Tracker**: a simple table that tracks how long a wash sale window has left
-  to run. The user enters a ticker and the date the trade was made, and the tool shows
-  two sections: **Active Wash Sales**, with the trade date and the date the window
-  expires, and **Expired Wash Sales**, the same rows once their date has passed. Every
-  record is held in browser storage on the user's own device. Scope, constraints, and the
-  open questions on it are set out in the milestone breakdown below
 
 Platform work:
 
@@ -344,7 +339,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 | v0.2.0 - Second tool batch, first tool shipped | 2026-08-31 | Complete |
 | v1.0.0 - Accessibility pass and first stable release | 2026-08-31 | Complete |
 | v1.1.0 - Platform: mobile navigation and tool search | 2026-08-31 | Complete |
-| v1.2.0 - Wash Sale Tracker | TBD | Planned |
+| v1.2.0 - Wash Sale Tracker | 2026-08-31 | Complete |
 | v1.3.0 - Bookmark Manager | TBD | Planned |
 
 > **Resolved in v1.0.0.** This table used to carry a row reading "v1.0.0 - Public
@@ -417,7 +412,7 @@ file operations through `FileReader` and a Blob download; and the collection is 
 user's data, so the storage key goes on the public surface list and can never be renamed
 without a migration read.
 
-### v1.2.0 planned: Wash Sale Tracker
+### v1.2.0 Wash Sale Tracker, complete 2026-08-31
 
 The second tool that owns a collection of the user's records rather than transforming a
 single input, so it shares the storage questions the Bookmark Manager raises. It is also
@@ -462,37 +457,43 @@ has been an external card on the landing page.
   the first key holding a collection rather than a single value, so it needs a stored
   schema version from day one, which none of the existing three has
 
-**Open design questions to resolve before building, not now:**
+**Design questions, all answered before building:**
 
-1. **What does the expiry date actually mean?** The requirement says "the expiration date
-   of the wash sale", which most likely means the trade date plus 30 days, after which a
-   repurchase no longer triggers the rule. That is worth confirming, because the US wash
-   sale rule runs 30 days **either side** of the sale, a 61 day window counting the trade
-   date itself. A tracker keyed on a single date handles only the forward half. Deciding
-   whether the backward half matters sets whether this is one date column or two
-2. **Calendar days or trading days?** The rule counts calendar days, so a window can
-   expire on a weekend or a market holiday. Counting trading days instead would be wrong
-   but is what some users expect. Calendar days is almost certainly right; the question is
-   whether the interface says so anywhere
-3. **Is a record ever edited or deleted?** The requirement describes adding and viewing.
-   A mistyped ticker with no way to remove it makes the table worse over time, and the
-   Bookmark Manager already establishes that an editor which cannot delete is not an
-   editor
-4. **Does the tool need to know a buy from a sell?** A wash sale is triggered by a sale at
-   a loss. The requirement asks only for "the date the trade was submitted", which implies
-   the user tracks that themselves. Adding a loss amount or a direction would make the
-   tool more correct and less simple, which is the tension to resolve
-5. **Should expired records ever be cleared?** Kept forever, the Expired table grows
-   without limit. A "clear expired" action is the obvious answer, but it destroys data on
-   a device where the user has no backup
+1. **What does the expiry date mean?** ~~Trade date plus 30 days, or the full 61 day
+   window the rule actually covers?~~ **Answered: trade date plus 30 days.** One expiry
+   column. The backward half of the rule is deliberately not modelled, because by the
+   time a user logs a trade that half is already history. The page says so in plain words
+   rather than leaving it implied, since a tool that silently covers half a rule is worse
+   than one that says which half
+2. **Calendar days or trading days?** **Calendar days**, which is what the rule counts, and
+   the page says so under the form: "weekends and holidays included". The question was
+   whether the interface states it. It does
+3. **Is a record ever edited or deleted?** **Deleted, yes; edited, no.** Every row has a
+   remove button with an accessible name naming the ticker and date, so a mistyped entry
+   costs one click. In-place editing was not added: with two fields, deleting and
+   re-adding is fewer interactions than an edit mode would be
+4. **Does the tool need to know a buy from a sell?** **No.** It stays a date tracker. A
+   loss amount or a direction would make it more correct and less simple, and the honest
+   version of "more correct" here is a tax tool, which this is not. The disclaimer states
+   the limitation instead
+5. **Should expired records ever be cleared?** **Yes, but never silently.** A "Clear
+   expired" button appears only when there is something to clear, names the count, and
+   goes through a confirm. It never touches active windows
 
-**Constraints it must respect:** no dependencies and no server, like everything else. The
-tool must state plainly that it is a record-keeping aid and not tax advice, and that it
-does not determine whether a wash sale occurred: it tracks dates the user enters. It
-cannot validate that a ticker exists, because that needs a network call and tenet 1
-forbids one, so ticker input is free text that is normalised (trimmed, uppercased) rather
-than checked. The footer data-location line follows the pattern the other tools use, in
-the manner of "Your trades never leave your device".
+**Constraints, all honoured:** no dependencies and no server. The page states plainly
+that it is a record keeping aid and not tax advice, that it does not know what was traded
+or whether a sale was at a loss, and that it does not cover the 30 days before a sale.
+Tickers cannot be validated without a network call, which tenet 1 forbids, so
+`normalizeTicker` strips anything outside `A-Z 0-9 . -`, uppercases, and caps at 12
+characters, keeping dots and hyphens because real symbols use them. The footer reads
+"Your trades never leave your device".
+
+**What shipped beyond the request:** a remove button per row, a "Clear expired" action
+behind a confirm, a days-remaining pill that turns amber under a week and red in the last
+two days, the date field defaulting to today so the common case is one field and a click,
+and recovery from corrupt storage. That last one matters more than it sounds: the stored
+value is JSON, and a hand-edited or truncated value would otherwise throw during page
+load and leave a blank page rather than a working tool with an empty table.
 
 > **On ordering.** This was originally placed after the Bookmark Manager because that
 > tool was requested first, with a note that it was plausibly the smaller of the two and
@@ -1467,9 +1468,12 @@ project that is:
   `window.copyText`, `window.mdToHtml`, `window.cleanUrl`, `window.countText`, and
   `window.formatDuration`, because a page in this repository imports them by name across
   a file boundary
-- The three `localStorage` keys, `azqato-theme`, `azqato-md-draft`, and
-  `azqato-cc-draft`, because a returning visitor's browser holds data under those exact
-  names
+- The four `localStorage` keys, `azqato-theme`, `azqato-md-draft`, `azqato-cc-draft`,
+  and `azqato-ws-records`, because a returning visitor's browser holds data under those
+  exact names. `azqato-ws-records` is the first that holds a collection rather than a
+  single value and the first that carries a schema version, so changing its record shape
+  means bumping `v` and reading the old shape before writing the new one, not just
+  renaming a key
 
 **Internal** means everything else: `README.md`, everything in `/docs`, individual CSS
 class names, DOM ids, and any function private to an IIFE or an inline script.

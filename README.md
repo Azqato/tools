@@ -10,9 +10,10 @@ nothing to install or sign up for.
 
 ## What the site offers
 
-The site is a single landing page listing every tool, plus one page per tool. Four
+The site is a single landing page listing every tool, plus one page per tool. Five
 tools are built and hosted here. Four more are Azqato projects that live on their own
-sites and are linked from the same list, marked "external".
+sites and are linked from the same list, marked "external". A search box above the list
+filters it as you type.
 
 ### Built and hosted here
 
@@ -43,6 +44,14 @@ takes to read silently and to say out loud. Underneath, a set of bars shows how 
 measures against the limits people actually run into, an X post, a single SMS, a search
 result meta description, a page title, and Instagram and LinkedIn captions, so you can
 see at a glance how much room is left or how far over you are.
+
+**Wash Sale Tracker**
+Log a ticker and the date you traded, and the tool counts the 30 day wash sale window
+forward for you. Active windows sit at the top with the number of days each has left to
+run, and windows that have passed drop into a second table underneath, where they stay
+until you clear them. It is a record keeping aid rather than tax advice: it tracks the
+dates you type in, and does not know what you traded or whether a sale was at a loss.
+Everything is stored in your own browser.
 
 ### Linked from here, hosted elsewhere
 
@@ -77,7 +86,7 @@ exception: it needs a connection, because it asks a public icon service for the 
 
 ## Current status
 
-Live, stable, and actively developed. Four in-browser tools are finished and working,
+Live, stable, and actively developed. Five in-browser tools are finished and working,
 and new ones are added when they can meet the same standard: useful, fast, and doing all
 their work on your device rather than someone's server. The site has had a full
 accessibility pass, so every page can be navigated by keyboard alone, works with a screen

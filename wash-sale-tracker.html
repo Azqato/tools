@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wash Sale Tracker - Azqato's Tools</title>
+  <meta name="description" content="Track how long each wash sale window has left to run. Add a ticker and the date you traded, and see active and expired windows side by side. Runs entirely in your browser." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
+      <div class="spacer"></div>
+      <a class="nav-link hide-sm" href="https://azqato.com/">Azqato</a>
+      <a class="nav-link hide-sm" href="https://azqato.com/projects">Projects</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/tools/">Tools</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/support.html">Support</a>
+      <button class="icon-btn nav-toggle" id="nav-toggle" aria-label="Menu"
+              aria-expanded="false" aria-controls="nav-menu">
+        <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+    <nav class="nav-menu" id="nav-menu" aria-label="Site" hidden>
+      <a href="https://azqato.com/">Azqato</a>
+      <a href="https://azqato.com/projects">Projects</a>
+      <a href="https://azqato.github.io/tools/">Tools</a>
+      <a href="https://azqato.github.io/support.html">Support</a>
+    </nav>
+  </header>
+
+  <main id="main" class="page wrap">
+    <div class="page-head">
+      <div class="crumb"><a href="index.html">Tools</a> / Wash Sale Tracker</div>
+      <h1>Wash Sale Tracker</h1>
+      <p>Add the ticker and the date you traded, and the tool counts the 30 day window
+        forward for you. Everything stays in this browser.</p>
+    </div>
+
+    <form class="ws-form" id="ws-form">
+      <div class="ws-field">
+        <label class="lbl" for="ws-ticker">Ticker</label>
+        <input id="ws-ticker" class="field" type="text" autocomplete="off"
+               placeholder="e.g. AAPL" maxlength="12" />
+      </div>
+      <div class="ws-field">
+        <label class="lbl" for="ws-date">Date traded</label>
+        <input id="ws-date" class="field" type="date" />
+      </div>
+      <button class="btn primary" type="submit">Add</button>
+    </form>
+    <p class="ws-note">Pick the date from the calendar or type it in. The window is
+      counted as the trade date plus 30 calendar days, weekends and holidays included.</p>
+
+    <div class="ws-head">
+      <h2 class="section-label">Active Wash Sales</h2>
+      <span class="count" id="ws-active-count"></span>
+    </div>
+    <div id="ws-active"></div>
+
+    <div class="ws-head">
+      <h2 class="section-label">Expired Wash Sales</h2>
+      <span class="count" id="ws-expired-count"></span>
+      <div class="spacer"></div>
+      <button class="btn sm ghost" id="ws-clear" hidden>Clear expired</button>
+    </div>
+    <div id="ws-expired"></div>
+
+    <p class="ws-legal"><strong>This is a record keeping aid, not tax advice.</strong>
+      It tracks dates you enter and counts forward from them. It does not know what you
+      traded, whether a sale was at a loss, or whether a wash sale actually occurred, and
+      it does not account for the 30 days <em>before</em> a sale that the rule also
+      covers. Check anything that matters with your broker's records or an accountant.</p>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© <span class="year"></span> Azqato's Tools</span>
+      <div class="spacer"></div>
+      <a href="index.html">Home</a>
+      <span style="color:var(--text-faint)">Your trades never leave your device</span>
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script src="js/washsale.js"></script>
+  <script>
+    var form = document.getElementById("ws-form");
+    var tickerEl = document.getElementById("ws-ticker");
+    var dateEl = document.getElementById("ws-date");
+    var activeBox = document.getElementById("ws-active");
+    var expiredBox = document.getElementById("ws-expired");
+    var activeCount = document.getElementById("ws-active-count");
+    var expiredCount = document.getElementById("ws-expired-count");
+    var clearBtn = document.getElementById("ws-clear");
+
+    // First key in the project holding a collection rather than a single value,
+    // so it carries a schema version from the start. Anything that changes the
+    // record shape bumps `v` and reads the old shape before writing the new one.
+    var STORE = "azqato-ws-records";
+    var SCHEMA = 1;
+
+    var records = load();
+
+    function load() {
+      var raw;
+      try { raw = localStorage.getItem(STORE); } catch (e) { return []; }
+      if (!raw) return [];
+      try {
+        var parsed = JSON.parse(raw);
+        if (!parsed || parsed.v !== SCHEMA || !parsed.records) return [];
+        return parsed.records.filter(function (r) {
+          return r && washSale.isValidDate(r.date) && r.ticker;
+        });
+      } catch (e) {
+        // Corrupt or hand-edited storage should cost the user their history,
+        // not the whole page. Start empty rather than throwing on load.
+        return [];
+      }
+    }
+
+    function save() {
+      try {
+        localStorage.setItem(STORE, JSON.stringify({ v: SCHEMA, records: records }));
+      } catch (e) {
+        toast("Couldn't save, storage may be full");
+      }
+    }
+
+    function human(iso) {
+      var p = iso.split("-");
+      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return +p[2] + " " + months[+p[1] - 1] + " " + p[0];
+    }
+
+    function pillFor(days) {
+      var cls = "ws-pill";
+      if (days <= 2) cls += " now";
+      else if (days <= 7) cls += " soon";
+      var text = days === 0 ? "last day"
+        : days === 1 ? "1 day left"
+        : days + " days left";
+      return { cls: cls, text: text };
+    }
+
+    function cell(row, text, cls) {
+      var td = document.createElement("td");
+      if (cls) td.className = cls;
+      td.textContent = text;
+      row.appendChild(td);
+      return td;
+    }
+
+    function table(cols) {
+      var t = document.createElement("table");
+      t.className = "ws-table";
+      var thead = document.createElement("thead");
+      var tr = document.createElement("tr");
+      cols.forEach(function (c) {
+        var th = document.createElement("th");
+        th.textContent = c.label;
+        if (c.cls) th.className = c.cls;
+        th.scope = "col";
+        tr.appendChild(th);
+      });
+      thead.appendChild(tr);
+      t.appendChild(thead);
+      t.appendChild(document.createElement("tbody"));
+      return t;
+    }
+
+    function empty(box, msg) {
+      var p = document.createElement("p");
+      p.className = "ws-empty";
+      p.textContent = msg;
+      box.appendChild(p);
+    }
+
+    function renderActive(rows) {
+      activeBox.innerHTML = "";
+      activeCount.textContent = rows.length === 1 ? "1 window" : rows.length + " windows";
+      if (!rows.length) {
+        empty(activeBox, "Nothing running. Add a trade above and it will appear here " +
+              "until its window closes.");
+        return;
+      }
+      var t = table([
+        { label: "Ticker" },
+        { label: "Traded" },
+        { label: "Expires" },
+        { label: "Remaining" },
+        { label: "Remove", cls: "act" }
+      ]);
+      var body = t.querySelector("tbody");
+      rows.forEach(function (r) {
+        var tr = document.createElement("tr");
+        cell(tr, r.ticker, "tk");
+        cell(tr, human(r.date), "num");
+        cell(tr, human(r.expiry), "num");
+
+        var td = document.createElement("td");
+        var pill = pillFor(r.daysLeft);
+        var span = document.createElement("span");
+        span.className = pill.cls;
+        span.textContent = pill.text;
+        td.appendChild(span);
+        tr.appendChild(td);
+
+        tr.appendChild(removeCell(r));
+        body.appendChild(tr);
+      });
+      activeBox.appendChild(t);
+    }
+
+    function renderExpired(rows) {
+      expiredBox.innerHTML = "";
+      expiredCount.textContent = rows.length === 1 ? "1 window" : rows.length + " windows";
+      clearBtn.hidden = rows.length === 0;
+      if (!rows.length) {
+        empty(expiredBox, "Nothing here yet. Windows move down once they have passed, " +
+              "and stay until you clear them.");
+        return;
+      }
+      var t = table([
+        { label: "Ticker" },
+        { label: "Traded" },
+        { label: "Expired" },
+        { label: "Remove", cls: "act" }
+      ]);
+      var body = t.querySelector("tbody");
+      rows.forEach(function (r) {
+        var tr = document.createElement("tr");
+        cell(tr, r.ticker, "tk");
+        cell(tr, human(r.date), "num");
+        cell(tr, human(r.expiry), "num");
+        tr.appendChild(removeCell(r));
+        body.appendChild(tr);
+      });
+      expiredBox.appendChild(t);
+    }
+
+    function removeCell(r) {
+      var td = document.createElement("td");
+      td.className = "act";
+      var btn = document.createElement("button");
+      btn.className = "ws-x";
+      btn.type = "button";
+      btn.setAttribute("aria-label", "Remove " + r.ticker + " traded " + human(r.date));
+      btn.innerHTML = "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' " +
+        "stroke-width='2' stroke-linecap='round'><path d='M6 6l12 12M18 6 6 18'/></svg>";
+      btn.onclick = function () { remove(r.id); };
+      td.appendChild(btn);
+      return td;
+    }
+
+    function remove(id) {
+      records = records.filter(function (r) { return r.id !== id; });
+      save();
+      render();
+      toast("Removed");
+    }
+
+    function render() {
+      var split = washSale.classify(records);
+      renderActive(split.active);
+      renderExpired(split.expired);
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var ticker = washSale.normalizeTicker(tickerEl.value);
+      var date = dateEl.value;
+
+      if (!ticker) { toast("Enter a ticker"); tickerEl.focus(); return; }
+      if (!washSale.isValidDate(date)) { toast("Pick a date"); dateEl.focus(); return; }
+
+      records.push({
+        id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+        ticker: ticker,
+        date: date
+      });
+      save();
+      render();
+      tickerEl.value = "";
+      tickerEl.focus();
+      toast(ticker + " added, clear on " + human(washSale.expiryOf(date)));
+    });
+
+    clearBtn.onclick = function () {
+      var split = washSale.classify(records);
+      var n = split.expired.length;
+      if (!n) return;
+      if (!confirm("Remove " + n + " expired " + (n === 1 ? "window" : "windows") +
+                   "? This cannot be undone.")) return;
+      var gone = {};
+      split.expired.forEach(function (r) { gone[r.id] = 1; });
+      records = records.filter(function (r) { return !gone[r.id]; });
+      save();
+      render();
+      toast("Cleared " + n + " expired");
+    };
+
+    // Default the date to today, so the common case is one field and a click.
+    dateEl.value = washSale.today();
+    render();
+
+    document.querySelectorAll(".year").forEach(function (el) {
+      el.textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>

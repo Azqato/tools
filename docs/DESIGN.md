@@ -1,6 +1,6 @@
 # Design System - Azqato's Tools
 
-**Last verified against the code:** 2026-08-31 for v1.1.0 (`css/style.css`, 773 lines, ~20.4KB)
+**Last verified against the code:** 2026-08-31 for v1.2.0 (`css/style.css`, 888 lines, ~23.1KB)
 
 Every value in this document was read out of `css/style.css` or the five HTML pages
 rather than inferred. Where the code and an earlier version of this document
@@ -511,6 +511,25 @@ never becomes visible and so uses clipping instead. Do not merge the two.
 
 Every page's `<main>` carries `id="main"` to receive it. A new page needs both halves:
 the anchor after `<body>` and the id on `<main>`. Neither works alone.
+
+### Data tables
+
+`.ws-table` is the project's first table component, introduced with the Wash Sale
+Tracker. Header cells are uppercase `0.76rem` `--text-faint`, matching `.section-label`
+rather than inventing a second small-caps treatment. Every `<th>` carries `scope="col"`,
+which the audit harness now checks on every table in the project.
+
+Two rules for anyone adding a second table. **Row borders, never row backgrounds:** the
+zebra striping that most tables reach for fights the card surfaces this system already
+uses. And **at most one coloured thing per row.** In the Wash Sale Tracker that is the
+`.ws-pill` showing days remaining, which is neutral by default, amber under a week, and
+`--danger` in the last two days. Colour is the urgency signal, so spending it anywhere
+else in the row would flatten it.
+
+`.ws-pill`'s amber has no token, because `--warning` does not exist in this system. It is
+written as a literal pair of hex values with a `[data-theme="dark"]` override alongside,
+matching how `--danger` and `--success` behave. **If a second component ever needs amber,
+promote it to a token rather than copying the hex.**
 
 ### Tool search
 

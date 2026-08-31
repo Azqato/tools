@@ -669,6 +669,121 @@ textarea.field { resize: vertical; line-height: 1.55; }
   .nav-toggle { display: inline-grid; }
 }
 
+/* ---- Wash Sale Tracker ---------------------------------------------------- */
+.ws-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.ws-field { flex: 1 1 190px; min-width: 0; }
+.ws-field .field { width: 100%; }
+/* The native date control sizes itself from its own text and ignores width on
+   some engines unless min-width is cleared first. */
+input[type="date"].field { min-width: 0; }
+
+.ws-note {
+  margin: 0 0 26px;
+  font-size: .85rem;
+  color: var(--text-faint);
+}
+
+.ws-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ws-head .section-label { margin-bottom: 0; }
+.ws-head .count {
+  font-size: .82rem;
+  color: var(--text-faint);
+}
+.ws-head .spacer { flex: 1; }
+
+.ws-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 30px;
+  font-size: .92rem;
+}
+.ws-table th {
+  text-align: left;
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 0 12px 9px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ws-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-soft);
+}
+.ws-table tr:last-child td { border-bottom: none; }
+.ws-table .tk {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .02em;
+}
+.ws-table .num { white-space: nowrap; }
+.ws-table .act { text-align: right; width: 1%; }
+
+/* Days left doubles as the urgency signal, so it is the only coloured thing in
+   the table. Under a week is amber, the last two days are the danger token. */
+.ws-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 700;
+  background: var(--bg-inset);
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.ws-pill.soon { background: #fdf0d5; color: #8a5a00; }
+.ws-pill.now { background: #fdeaed; color: var(--danger); }
+[data-theme="dark"] .ws-pill.soon { background: #3a2e12; color: #f0c04a; }
+[data-theme="dark"] .ws-pill.now { background: #3a1c22; color: #ff8fa0; }
+
+.ws-x {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  padding: 4px;
+  border-radius: 6px;
+  line-height: 0;
+  transition: .15s ease;
+}
+.ws-x:hover { color: var(--danger); background: var(--bg-inset); }
+.ws-x svg { width: 15px; height: 15px; }
+
+.ws-empty {
+  padding: 26px 4px 34px;
+  color: var(--text-faint);
+  font-size: .92rem;
+}
+
+.ws-legal {
+  margin: 34px 0 0;
+  padding: 16px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+  color: var(--text-soft);
+  font-size: .85rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 560px) {
+  .ws-table .hide-xs { display: none; }
+}
+
 /* ---- Mobile navigation ----------------------------------------------------
    The topbar links carry .hide-sm and vanish below 760px, which left tool
    pages with no way to reach Projects or Support on a phone. This is the
