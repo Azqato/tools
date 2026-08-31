@@ -183,6 +183,12 @@ Tool candidates, all of which must be buildable with zero dependencies:
   format back so the result can be imported into Chrome again. The collection is held in
   browser storage on the user's own device, so the tool never sees a server. Scope,
   constraints, and the open questions on it are set out in the milestone breakdown below
+- **Wash Sale Tracker**: a simple table that tracks how long a wash sale window has left
+  to run. The user enters a ticker and the date the trade was made, and the tool shows
+  two sections: **Active Wash Sales**, with the trade date and the date the window
+  expires, and **Expired Wash Sales**, the same rows once their date has passed. Every
+  record is held in browser storage on the user's own device. Scope, constraints, and the
+  open questions on it are set out in the milestone breakdown below
 
 Platform work:
 
@@ -343,6 +349,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 | v0.2.0 - Second tool batch, first tool shipped | 2026-08-31 | Complete |
 | v1.0.0 - Accessibility pass and first stable release | 2026-08-31 | Complete |
 | v1.1.0 - Bookmark Manager | TBD | Planned |
+| v1.2.0 - Wash Sale Tracker | TBD | Planned |
 
 > **Resolved in v1.0.0.** This table used to carry a row reading "v1.0.0 - Public
 > deployment to GitHub Pages, Complete" while the changelog was still at v0.1.x, so the
@@ -413,6 +420,89 @@ hand-written like the Markdown parser; no server, so import and export are both 
 file operations through `FileReader` and a Blob download; and the collection is the
 user's data, so the storage key goes on the public surface list and can never be renamed
 without a migration read.
+
+### v1.2.0 planned: Wash Sale Tracker
+
+The second tool that owns a collection of the user's records rather than transforming a
+single input, so it shares the storage questions the Bookmark Manager raises. It is also
+the first hosted tool in the finance domain, where until now every Azqato finance tool
+has been an external card on the landing page.
+
+**Scope, as requested:**
+
+- An entry form taking two fields: a ticker or stock symbol, and the date the trade was
+  made. The date must be enterable either by typing it or by picking it from a calendar
+- **Active Wash Sales**, a table of records whose window has not yet expired, showing
+  the trade date and the expiry date
+- **Expired Wash Sales**, the same columns, holding records whose window has passed.
+  Expired records are kept rather than discarded, since the point of the section is that
+  the user can still see them
+- All records held in browser storage on the user's own device, under a documented
+  `localStorage` key
+
+**Design notes that follow from the existing codebase:**
+
+- **Active versus expired is derived, never stored.** A record holds a ticker and a trade
+  date and nothing else; which table it appears in is computed from today's date at
+  render time. Storing a boolean would go stale the moment the tab is left open
+  overnight, and would need a migration to fix. This is the single most important
+  decision in the tool and it costs nothing to get right at the start
+- **The date picker needs no dependency.** `<input type="date">` is native, gives a
+  calendar in every target browser, accepts typed input, and satisfies both halves of the
+  requirement on its own. It has its own focus and validation styling that will need
+  bringing into line with `.field` in `DESIGN.md`
+- **Date arithmetic is the whole tool, so it gets its own pure module**, `js/washsale.js`,
+  exporting through `window` like the other three tool modules and never touching the
+  DOM. That is what makes it testable by the harness technique in Working practice, which
+  matters more here than in any tool shipped so far, because an off-by-one in a date
+  boundary is invisible by eye and wrong for exactly one day
+- **Timezones are the trap.** `new Date("2026-08-31")` parses as UTC midnight while
+  `new Date(2026, 7, 31)` parses as local midnight, so the naive version of this tool
+  shows the wrong day for any user west of Greenwich for part of the day. Store dates as
+  plain `YYYY-MM-DD` strings, compare them as strings or as integer day counts, and never
+  put a `Date` object into storage
+- The storage key follows the existing convention, most likely `azqato-ws-records`, and
+  goes on the public surface list in Deprecation and removal like the other three. It is
+  the first key holding a collection rather than a single value, so it needs a stored
+  schema version from day one, which none of the existing three has
+
+**Open design questions to resolve before building, not now:**
+
+1. **What does the expiry date actually mean?** The requirement says "the expiration date
+   of the wash sale", which most likely means the trade date plus 30 days, after which a
+   repurchase no longer triggers the rule. That is worth confirming, because the US wash
+   sale rule runs 30 days **either side** of the sale, a 61 day window counting the trade
+   date itself. A tracker keyed on a single date handles only the forward half. Deciding
+   whether the backward half matters sets whether this is one date column or two
+2. **Calendar days or trading days?** The rule counts calendar days, so a window can
+   expire on a weekend or a market holiday. Counting trading days instead would be wrong
+   but is what some users expect. Calendar days is almost certainly right; the question is
+   whether the interface says so anywhere
+3. **Is a record ever edited or deleted?** The requirement describes adding and viewing.
+   A mistyped ticker with no way to remove it makes the table worse over time, and the
+   Bookmark Manager already establishes that an editor which cannot delete is not an
+   editor
+4. **Does the tool need to know a buy from a sell?** A wash sale is triggered by a sale at
+   a loss. The requirement asks only for "the date the trade was submitted", which implies
+   the user tracks that themselves. Adding a loss amount or a direction would make the
+   tool more correct and less simple, which is the tension to resolve
+5. **Should expired records ever be cleared?** Kept forever, the Expired table grows
+   without limit. A "clear expired" action is the obvious answer, but it destroys data on
+   a device where the user has no backup
+
+**Constraints it must respect:** no dependencies and no server, like everything else. The
+tool must state plainly that it is a record-keeping aid and not tax advice, and that it
+does not determine whether a wash sale occurred: it tracks dates the user enters. It
+cannot validate that a ticker exists, because that needs a network call and tenet 1
+forbids one, so ticker input is free text that is normalised (trimmed, uppercased) rather
+than checked. The footer data-location line follows the pattern the other tools use, in
+the manner of "Your trades never leave your device".
+
+> **On ordering.** This sits at v1.2.0 because the Bookmark Manager was requested first,
+> not because it is larger. It is plausibly the smaller of the two: no file format parser,
+> no import or export, no folder tree, and a record of two fields against the Bookmark
+> Manager's tree of many. If the two are ever reordered by effort, this is the one that
+> moves up.
 
 ### v1.0.0 accessibility pass, complete 2026-08-31
 
@@ -1980,8 +2070,12 @@ and is open question 8. Until it is resolved, the Metrics section is a statement
 intent.
 
 **What is the roadmap direction?**
-More tools from the Future list, then an accessibility pass to close the gaps listed in
-`DESIGN.md`. Explicitly not on the roadmap: accounts, a backend, monetisation, or a
+The accessibility pass shipped as v1.0.0, so the direction from here is more tools from
+the Future list, two of which have their own milestones: the Bookmark Manager at v1.1.0
+and the Wash Sale Tracker at v1.2.0. Alongside them sit two platform items, search or
+filter on the landing grid now that the eight-tool trigger has been met, and a real
+mobile navigation, which is the last accessibility gap v1.0.0 did not close.
+Explicitly not on the roadmap: accounts, a backend, monetisation, or a
 framework rewrite. Each of those is excluded by a tenet rather than by preference.
 
 **How is this project maintained?**

@@ -5,6 +5,58 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v1.0.1 - 2026-08-31
+
+Documentation only. No code changed, nothing on the live site behaves differently.
+
+### Added
+- Added the **Wash Sale Tracker** to the Future tool list and gave it a v1.2.0 milestone
+  in `docs/PRD.md`. Requested scope: a ticker and trade date entry form with the date
+  enterable by typing or from a calendar, an Active Wash Sales table showing the trade
+  date and the window's expiry date, an Expired Wash Sales table with the same columns
+  for windows that have passed, and every record held in browser storage on the user's
+  own device
+- Added four design notes to that milestone that follow from the existing codebase
+  rather than from the request, so they are settled before anyone starts building.
+  Active versus expired is derived at render time and never stored, because a stored
+  boolean goes stale the moment a tab is left open overnight. `<input type="date">`
+  satisfies both halves of the calendar-or-typed requirement with no dependency. Date
+  arithmetic goes in a pure `js/washsale.js` so the test harness can reach it, which
+  matters more here than in any tool so far because an off-by-one in a date boundary is
+  invisible by eye and wrong for exactly one day. And dates are stored as plain
+  `YYYY-MM-DD` strings, never as `Date` objects, because `new Date("2026-08-31")` parses
+  as UTC midnight while `new Date(2026, 7, 31)` parses as local midnight, which shows
+  the wrong day to any user west of Greenwich for part of every day
+- Added five open design questions to the same milestone, the first of which is load
+  bearing: the requirement says "the expiration date of the wash sale", which most
+  likely means the trade date plus 30 days, but the US wash sale rule runs 30 days
+  either side of the sale, a 61 day window. A tracker keyed on one date covers only the
+  forward half, and answering this decides whether the table has one date column or two
+- Added the constraint that the tool must state plainly that it is a record-keeping aid
+  and not tax advice, and that it does not determine whether a wash sale occurred but
+  tracks dates the user enters. Ticker input cannot be validated, since that needs a
+  network call and tenet 1 forbids one, so it is free text that is normalised rather
+  than checked
+- Added a note that this is the first hosted tool in the finance domain, where every
+  Azqato finance tool until now has been an external card on the landing page, and that
+  its `localStorage` key would be the first holding a collection rather than a single
+  value, so it needs a stored schema version from day one that none of the existing
+  three keys has
+
+### Changed
+- Changed the roadmap direction answer in the `PRD.md` FAQ, which still said the plan
+  was "more tools, then an accessibility pass". That pass shipped as v1.0.0. It now
+  names the two tool milestones and the two remaining platform items
+
+### Not changed, and why
+- The Wash Sale Tracker sits at v1.2.0 because the Bookmark Manager was requested first,
+  not because it is larger. It is plausibly the smaller of the two: no file format
+  parser, no import or export, no folder tree, and a record of two fields against a tree
+  of many. This is recorded as a note on the milestone rather than acted on, because
+  reordering milestones by effort is a decision for the author and was not asked for
+
+---
+
 ## v1.0.0 - 2026-08-31
 
 First stable release. The major bump is not a marketing gesture: it settles a version
