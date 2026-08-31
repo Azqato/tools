@@ -28,9 +28,13 @@ This product solves that by providing a curated set of utilities that run entire
 the browser: zero server contact for any user data, zero sign-up, zero cost.
 
 The problem is not that good browser-side tools do not exist. Several of the tools
-here were directly inspired by existing services (see the original brief in
-`initialconcept.txt`, which names markdownlivepreview.com, folge.me's favicon
-downloader, and linkcleaner.app). The problem is that a user has to find, evaluate,
+here were directly inspired by existing services. The original one-paragraph brief
+named three by URL: markdownlivepreview.com, folge.me's favicon downloader, and
+linkcleaner.app. It also set the two constraints the project still runs on, that every
+tool works natively in the browser with no server-side process, and that the stack is
+plain HTML, CSS, and JavaScript. That brief lived in an untracked file,
+`initialconcept.txt`, which was deleted in v1.0.0 once its content had been absorbed
+here. This paragraph is now the record of it. The problem is that a user has to find, evaluate,
 and trust each one separately, and that most of them process data on a server when
 they do not have to. Collecting them under one roof, with one privacy model that is
 the same for every tool, removes that per-tool evaluation cost.
@@ -153,7 +157,7 @@ scope by definition.
 | Global clipboard copy helper with `execCommand` fallback | v0.1.0 | `js/common.js` |
 | Markdown Editor: split-pane live preview, seven-button formatting toolbar, draft autosave, copy as HTML, download as `.md`, character count, sample document | v0.1.0 | `markdown-preview.html`, `js/markdown.js` |
 | Favicon Downloader: six sizes, preview grid, PNG download, copy direct link, graceful failure per icon | v0.1.0 | `favicon-downloader.html` |
-| Link Cleaner: 48 exact-name and 11 prefix tracking rules, removed and kept chips, copy, open, paste from clipboard, Ctrl+Enter shortcut | v0.1.0 | `link-cleaner.html`, `js/linkcleaner.js` |
+| Link Cleaner: 47 exact-name and 11 prefix tracking rules, removed and kept chips, copy, open, paste from clipboard, Ctrl+Enter shortcut | v0.1.0 | `link-cleaner.html`, `js/linkcleaner.js` |
 | External tool cards with `external` badge and diagonal arrow | v0.1.1 | `index.html` |
 | Responsive layout, two breakpoints | v0.1.0 | `css/style.css` |
 | Site-wide navigation shared with other Azqato properties | v0.1.5 | all five pages |
@@ -182,11 +186,14 @@ Tool candidates, all of which must be buildable with zero dependencies:
 
 Platform work:
 
-- `prefers-reduced-motion` support in CSS
-- Skip-to-main-content link on every page
-- ARIA live region on the Markdown preview pane and `role="status"` on the toast
-- Labels for `#fav-input` and `#md-input`
-- Search or filter on the landing page tool grid, once eight or more tools exist
+- Search or filter on the landing page tool grid. The trigger condition set for this,
+  eight or more tools, has now been met: the grid holds four hosted cards and four
+  external ones. It is the next platform item due
+- A visible mobile navigation. Below 760px all four topbar links are hidden and tool
+  page footers link only Home, so Projects and Support are unreachable from a tool page
+  on a phone. This is open question 4 and is the largest remaining accessibility gap
+  that the v1.0.0 pass did not close, because it is a design problem rather than an
+  attribute
 - Custom parameter rules in the Link Cleaner, so a user can add their own removals
 - A `/favicon.ico` fallback in the Favicon Downloader for when the Google service fails
 
@@ -320,7 +327,7 @@ the tool.
 
 ## Roadmap
 
-### Current phase: Foundation, v0.1.x
+### Current phase: Stable, v1.0.x
 
 The site is deployed and working. Four hosted tools, four external links, a complete
 design system, shared JavaScript, and a full documentation suite are all in place. The
@@ -331,21 +338,19 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 | Milestone | Target | Status |
 |-----------|--------|--------|
 | v0.1.0 - Initial build | 2026-06-27 | Complete |
-| v1.0.0 - Public deployment to GitHub Pages | 2026-06-27 | Complete |
+| v0.1.4 - Public deployment to GitHub Pages | 2026-06-27 | Complete |
 | v0.1.8 - Documentation audit and em dash sweep | 2026-08-25 | Complete |
-| v0.2.0 - Second tool batch, first tool shipped | 2026-08-31 | In Progress |
-| v0.3.0 - Bookmark Manager | TBD | Planned |
-| v0.4.0 - Accessibility pass | TBD | Planned |
+| v0.2.0 - Second tool batch, first tool shipped | 2026-08-31 | Complete |
+| v1.0.0 - Accessibility pass and first stable release | 2026-08-31 | Complete |
+| v1.1.0 - Bookmark Manager | TBD | Planned |
 
-> **Discrepancy (open).** The milestone table inherited from the previous version of
-> this document lists v1.0.0 as Complete while the project version is still v0.1.x and
-> `PATCHNOTES.md` has never recorded a v1.0.0 entry. The two readings are: the version
-> number tracks the codebase (still pre-1.0, which is what the changelog says), or
-> v1.0.0 was used to mean "public launch happened" (which it did, on 2026-06-27). The
-> changelog is the more reliable record of what shipped, so the version line should be
-> considered v0.1.x. The v1.0.0 row is kept because deleting it would erase the fact
-> that a public launch milestone was declared and met. The author should decide whether
-> to renumber the milestone or drop it.
+> **Resolved in v1.0.0.** This table used to carry a row reading "v1.0.0 - Public
+> deployment to GitHub Pages, Complete" while the changelog was still at v0.1.x, so the
+> two records contradicted each other. The launch it described was real and happened on
+> 2026-06-27; the version number attached to it was wrong, because that work is recorded
+> in `PATCHNOTES.md` as v0.1.4. The row has been relabelled v0.1.4 and the number v1.0.0
+> reassigned to the release that earned it, the accessibility pass of 2026-08-31.
+> Nothing about the launch was deleted; only the label moved.
 
 ### v0.1.0 feature breakdown, complete
 
@@ -356,7 +361,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 - External tool cards (Screener, Net Worth Tracker, VIX Strategy)
 - Documentation suite (README, PRD, DESIGN, PATCHNOTES)
 
-### v0.2.0, in progress
+### v0.2.0, complete
 
 - **Character Counter, shipped 2026-08-31.** Live counts for characters with and without
   spaces, words, sentences, paragraphs, and lines, plus reading and speaking time
@@ -364,7 +369,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 - One or two further tools from the Future list, exact tools not yet chosen
 - Landing page copy revisit once the grid exceeds eight cards
 
-### v0.3.0 planned: Bookmark Manager
+### v1.1.0 planned: Bookmark Manager
 
 A larger tool than anything shipped so far, and the first one that owns a user's data
 rather than transforming a single input, so it is given its own milestone rather than
@@ -409,19 +414,52 @@ file operations through `FileReader` and a Blob download; and the collection is 
 user's data, so the storage key goes on the public surface list and can never be renamed
 without a migration read.
 
-### v0.4.0 planned: accessibility pass
+### v1.0.0 accessibility pass, complete 2026-08-31
 
-- `prefers-reduced-motion` CSS block
-- Skip-to-content link on all pages
-- ARIA live region on the Markdown preview, `role="status"` on the toast
-- Labels for the two unlabelled inputs
-- Lighthouse accessibility score of 95 or above, measured rather than assumed
+Every item on this milestone shipped, and the milestone is the reason the project is at
+v1.0.0 rather than v0.2.1.
+
+- `prefers-reduced-motion` CSS block. Done. It is the last block in `css/style.css` so
+  that it wins over every transition declared above it, with durations set to 1ms rather
+  than 0 so `transitionend` still fires and nothing waiting on it is left hanging
+- Skip-to-content link on all pages. Done. `.skip-link` is the first focusable element
+  on all five pages, positioned off-screen until focused, targeting `#main`
+- `role="status"` on the toast. Done, in `js/common.js` at the point the element is
+  created, so every page gets it without repeating the attribute in five files
+- Labels for the unlabelled inputs. Done. `#fav-input` and `#md-input` now carry
+  `<label class="sr-only">` elements, using a new visually-hidden utility class
+- ARIA live region on the Markdown preview. **Deliberately not done.** See below
+- Lighthouse accessibility score of 95 or above, measured rather than assumed.
+  **Partially met, and this item was written wrong.** See below
+
+> **The Markdown preview does not get `aria-live`, and that is a decision rather than an
+> omission.** The pane re-renders on every keystroke. An `aria-live` region announces its
+> new content every time it changes, so a screen reader user typing a paragraph would
+> hear the entire document read back after every character. That is worse than silence.
+> The pane instead got `role="region"` and `aria-label="Rendered preview"`, which makes
+> it a named landmark the user can jump to and read at a moment they choose. If this is
+> ever revisited, the correct pattern is a debounced `aria-live="polite"` region carrying
+> a short summary such as "preview updated, 12 paragraphs", never the rendered document.
+
+> **On the Lighthouse target.** This item cannot be met as written on the current
+> machine, and the audit that wrote it should have caught that. Lighthouse needs Node,
+> and Node is not installed; see Technical requirements. What was run instead is a
+> structural accessibility audit written for the purpose: a throwaway harness that
+> fetched all five pages, parsed each with `DOMParser`, and asserted on `lang`, landmark
+> elements, exactly one `h1`, heading-level order, duplicate ids, `img` `alt`,
+> form-control labelling, accessible names on every button and link, orphan labels, and
+> the presence of a skip link. All five pages pass all of it. That is a real result and
+> it is not a Lighthouse score. Lighthouse also measures colour contrast, tap-target
+> size, and viewport behaviour, none of which that harness checks. The honest status is
+> that every structural gap this project had written down is now closed, and the numeric
+> target stays open until a machine with Node is available. Do not mark this item met
+> until a real score exists.
 
 ### Explicitly deferred
 
 | Feature | Reason deferred |
 |---------|----------------|
-| Search or filter on the landing page | Not useful until eight or more tools exist |
+| Search or filter on the landing page | Was deferred until eight or more tools exist. **That condition is now met**, at four hosted and four external cards, so this is no longer deferred: it has moved to the Future feature list as the next platform item |
 | Analytics | Privacy first. Revisit only with a privacy-respecting option such as Plausible |
 | Dark mode on the external tools | Those live in separate repositories and are out of scope here |
 | PWA and service worker | Adds a caching layer and an update-invalidation problem in exchange for something the browser cache already mostly does |
@@ -704,7 +742,6 @@ See Conventions.
 ├── favicon-downloader.html     Favicon Downloader tool page
 ├── link-cleaner.html           Link Cleaner tool page
 ├── character-counter.html      Character Counter tool page
-├── initialconcept.txt          Original one-paragraph brief. Reference only, not served
 ├── css/
 │   └── style.css               The entire design system. Every page loads this
 ├── js/
@@ -721,15 +758,12 @@ See Conventions.
 There are no other directories, no build output directory, no `node_modules`, and no
 CI configuration files.
 
-> **Discrepancy (resolved by recording).** `initialconcept.txt` is listed in the folder
-> structure and referenced in `PATCHNOTES.md` v0.1.0 as part of the project, but as of
-> 2026-08-25 it is untracked in git (`git status` shows it as `??`). It exists on the
-> maintenance machine and not in the repository. The documentation describes intent
-> (this file is part of the project's record) and the code describes reality (it has
-> never been committed). It is left untracked and unchanged by this audit, since
-> committing a file is a source change outside the scope of a documentation audit. The
-> author should either commit it or remove it from the folder structure above. See open
-> question 1.
+> **Resolved in v1.0.0.** This tree previously listed `initialconcept.txt`, the original
+> brief, which was never committed to git. The author's decision was to delete it rather
+> than commit it, on the grounds that its content is now fully captured in the Problem
+> statement above. The file is gone from the working tree and from this tree. Nothing
+> was lost: the three inspiration URLs and both original constraints are recorded in
+> prose at the top of this document.
 
 ### Data models
 
@@ -855,27 +889,36 @@ when every parameter was removed.
 Removal rules. A key matches if its lowercase form is in the exact set, or if it starts
 with one of the prefixes.
 
-*Exact names (48 entries as written):* `fbclid`, `gclid`, `gclsrc`, `dclid`, `wbraid`,
+*Exact names (47 entries, all live):* `fbclid`, `gclid`, `gclsrc`, `dclid`, `wbraid`,
 `gbraid`, `msclkid`, `yclid`, `twclid`, `igshid`, `igsh`, `mc_eid`, `mc_cid`, `_hsenc`,
 `_hsmi`, `vero_id`, `vero_conv`, `oly_anon_id`, `oly_enc_id`, `rb_clickid`, `s_cid`,
 `ml_subscriber`, `ml_subscriber_hash`, `spm`, `scm`, `ref_src`, `ref_url`,
 `fb_action_ids`, `fb_action_types`, `fb_ref`, `fb_source`, `action_object_map`,
-`action_type_map`, `action_ref_map`, `gs_l`, `amp`, `_ga`, `_gl`, `" trk"` (with a
-leading space), `trk`, `trkCampaign`, `sc_channel`, `sc_campaign`, `sc_geo`,
-`sc_country`, `sc_outcome`, `ttclid`, `li_fat_id`.
+`action_type_map`, `action_ref_map`, `gs_l`, `amp`, `_ga`, `_gl`, `trk`, `trkcampaign`,
+`sc_channel`, `sc_campaign`, `sc_geo`, `sc_country`, `sc_outcome`, `ttclid`,
+`li_fat_id`.
 
 *Prefixes (11):* `utm_`, `pk_`, `mtm_`, `matomo_`, `hsa_`, `vgo_`, `oly_`, `_branch_`,
 `__hs`, `ck_`, `mkt_tok`.
 
-Two notes on that list, both verified by reading the source:
+One note on that list, and one standing rule that came out of it.
 
-1. The entry `" trk"` has a leading space. Since keys are lowercased but not trimmed
-   before the set lookup, and a URL parameter key cannot begin with a literal space in
-   practice, this entry is dead. It is harmless. `"trk"` on the following line is the
-   live rule. Recorded as technical debt.
-2. `trkCampaign` is stored with capital letters but every lookup lowercases the key
-   first, so this entry can never match either. The lowercase form `trkcampaign` is not
-   in the set. Recorded as technical debt.
+**Fixed in v1.0.0.** Until v1.0.0 this list had 48 entries, two of which could never
+match. `" trk"` carried a leading space, and `trkCampaign` carried capitals, while
+`shouldRemove` lowercases the key before the set lookup but does not trim it. Both were
+repaired: `" trk"` was deleted outright rather than trimmed, because `"trk"` was already
+present on the same line and doing the obvious fix would have produced a duplicate in a
+`Set`; `trkCampaign` became `trkcampaign`. The visible consequence is that a URL
+carrying `trkCampaign` in any casing is now stripped where before it passed through
+untouched. `trk` behaved correctly the whole time and is unchanged.
+
+**The standing rule this produced: every entry in `EXACT` must be lowercase and must
+have no surrounding whitespace.** `shouldRemove` lowercases the incoming key but does
+not trim it, so the set is the only place that invariant can be enforced, and it is
+enforced by eye. An entry that violates it does not throw and does not warn. It silently
+does nothing, which is exactly why the two dead entries survived from v0.1.0 to v1.0.0
+without anyone noticing. When adding a rule, type it in lowercase and check it against
+the live list for a duplicate before committing.
 
 **`js/charactercounter.js`** attaches two globals. Like the other two tool modules it
 never touches the DOM, so every function is a pure function over its arguments:
@@ -984,13 +1027,8 @@ outbound links; no data is passed to them and no code is loaded from them.
 | Item | Shortcut taken | Correct solution |
 |------|---------------|-----------------|
 | Markdown code-span sentinel | `js/markdown.js` uses a literal NUL character (`"\0"`, embedded as a raw byte in the source) as the placeholder that protects inline code from the inline formatting rules | Use a long random string that cannot appear in user text. The NUL byte makes the file report as binary to some tools, which is why `grep` treats `markdown.js` as a binary file |
-| Dead Link Cleaner rules | `" trk"` has a leading space and `trkCampaign` has capitals, so neither can ever match a lowercased, untrimmed key | Delete `" trk"`, lowercase `trkCampaign` to `trkcampaign` |
 | Image `src` not protocol-checked | Markdown links are whitelisted to safe protocols; image sources are only attribute-escaped | Apply the same whitelist to `src` |
-| No `prefers-reduced-motion` | Every transition and the smooth scroll fire regardless of the user's system setting | One media block zeroing `transition-duration`, `animation-duration`, and `scroll-behavior` |
-| No skip-to-content link | Not implemented on any page | Add a visually-hidden first-child anchor targeting `<main>` |
-| No live region on the Markdown preview | Screen readers do not announce preview updates | `role="region"` plus `aria-live="polite"` on `.md-preview` |
-| No `role="status"` on the toast | The only feedback channel is silent to screen readers | Add the role where the element is created in `common.js` |
-| Two unlabelled inputs | `#fav-input` and `#md-input` rely on placeholders | Add real `<label>` elements, visually hidden if the design does not want them |
+| No mobile navigation | Below 760px `.hide-sm` hides all four topbar links and tool page footers link only Home, so Projects and Support are unreachable from a tool page on a phone | A real answer, most likely a disclosure menu behind the existing icon button row. This is the one accessibility item the v1.0.0 pass did not close, because it needs a design decision rather than an attribute. See open question 4 |
 | Theme flash | `common.js` loads at the end of `<body>` while `<html>` hardcodes `data-theme="light"` | Move the localStorage read to an inline `<script>` in `<head>` |
 | Silent clipboard failure | `copyText`'s `execCommand` fallback swallows its exception and shows no toast | Toast a failure message in the `catch` |
 | Unguarded `localStorage` writes | None of the three writes is wrapped in `try/catch` | Wrap all three; degrade to non-persistent behaviour instead of throwing. The cost of this grows with every tool that autosaves |
@@ -1120,8 +1158,12 @@ which does not exist.
 - **Branching:** trunk-based on `master`. There are no other branches, local or remote,
   and no merge commits. Every commit is a direct commit to `master`, which is also the
   deploy branch.
-- **Tags:** none exist. Version numbers live only in `PATCHNOTES.md` headings. A reader
-  who wants the code at v0.1.5 has to map it to a commit by date and message.
+- **Tags:** annotated, one per release, named `vMAJOR.MINOR.PATCH`. Every release from
+  v0.1.3 onward has one. Tag the release commit as part of shipping it, not later.
+  Three versions have no tag and never will: v0.1.0 through v0.1.2 predate the
+  repository, whose first commit is already v0.1.3. `PATCHNOTES.md` remains the
+  authoritative record of what changed; the tags exist so that a version number resolves
+  to a commit without reading dates and guessing.
 - **Type vocabulary is loose.** `ui` and `nav` are both used where `feat` or `style`
   would also fit. The dominant pattern is "a short lowercase word describing the area
   touched", not a fixed Conventional Commits set. Match that.
@@ -1331,9 +1373,8 @@ project that is:
   `azqato-cc-draft`, because a returning visitor's browser holds data under those exact
   names
 
-**Internal** means everything else: `README.md`, everything in `/docs`,
-`initialconcept.txt`, individual CSS class names, DOM ids, and any function private to
-an IIFE or an inline script.
+**Internal** means everything else: `README.md`, everything in `/docs`, individual CSS
+class names, DOM ids, and any function private to an IIFE or an inline script.
 
 **Removing something public facing** retires the address behind a compatibility shim
 pointing at whatever replaces it, so the old address keeps resolving:
@@ -1399,9 +1440,9 @@ Resolved entries stay in the table with a note on how they were resolved.
 | 2 | `DESIGN.md` stated "form inputs have associated `<label>` elements". Three of four inputs have none | The code, for what is. The document, for what should be | Recorded in `DESIGN.md` as an open discrepancy and listed as accessibility gaps 4 and 5. The rule was kept, the gap was written down, neither was softened |
 | 3 | `DESIGN.md` philosophy said "no gradients on content" while two gradients exist (logo, hero heading) | Ambiguous. The code is deliberate; the wording is imprecise | Recorded in `DESIGN.md` as an open discrepancy with both readings and a question for the author |
 | 4 | `DESIGN.md` breakpoint notes described `.hide-sm` as hiding "All tools / nav text links", a description left over from a nav structure that no longer exists | The code | Resolved. Rewritten to name the four current links, with the mobile-navigation consequence recorded as a known gap |
-| 5 | `PRD.md` folder structure and `PATCHNOTES.md` v0.1.0 both list `initialconcept.txt` as part of the project. `git status` shows it untracked, so it has never been in the repository | Both. The docs record intent, git records reality | Recorded above under Folder structure and raised as open question 1. The file was not committed, because committing a source file is outside the scope of a documentation audit |
-| 6 | `PRD.md` roadmap marks v1.0.0 Complete while the project version is v0.1.x and no v1.0.0 changelog entry exists | The changelog, for the version number. The roadmap row, for the fact that a launch happened | Recorded in the Roadmap as an open discrepancy. The row was kept rather than deleted, since it records a real event |
-| 7 | `PRD.md` described the Link Cleaner's exact-name list without noting that two of its entries can never match: `" trk"` has a leading space and `trkCampaign` has capitals, while lookups lowercase but do not trim | The code | Resolved. Both are documented in API design and listed as technical debt. The count is stated as "48 entries as written" rather than as 48 working rules |
+| 5 | `PRD.md` folder structure and `PATCHNOTES.md` v0.1.0 both list `initialconcept.txt` as part of the project. `git status` shows it untracked, so it has never been in the repository | Both. The docs record intent, git records reality | Resolved in v1.0.0. The author chose deletion over committing. The file was read before being deleted, its content confirmed already present in the Problem statement, and every reference to it in this document and in `PATCHNOTES.md` was rewritten to describe it in the past tense |
+| 6 | `PRD.md` roadmap marks v1.0.0 Complete while the project version is v0.1.x and no v1.0.0 changelog entry exists | The changelog, for the version number. The roadmap row, for the fact that a launch happened | Resolved in v1.0.0. The author chose to bump the version line to v1.0.0 rather than renumber the milestone, so the two records now agree. The milestone row was kept and relabelled as the launch it describes |
+| 7 | `PRD.md` described the Link Cleaner's exact-name list without noting that two of its entries can never match: `" trk"` has a leading space and `trkCampaign` has capitals, while lookups lowercase but do not trim | The code | Resolved in v1.0.0. Both entries were repaired: `" trk"` was a duplicate of the working `"trk"` entry and was deleted, and `trkCampaign` was lowercased to `trkcampaign` so it now matches. The list is 47 entries and all 47 of them work |
 | 8 | `PRD.md` technical debt described the Markdown sentinel as "a literal null char", which reads as a guess | The code confirms it. The byte at that position in `js/markdown.js` really is `0x00` | Resolved and kept, with the consequence added: the NUL byte makes `grep` treat the file as binary |
 | 9 | `PRD.md` claimed Markdown link protocols are whitelisted, which is true, without noting that image sources are not | The code | Resolved. Documented in API design, in Known attack surface, and as technical debt |
 | 10 | `PRD.md` Metrics presented targets in a way that could be read as measurements | Neither. Nothing is measured, because no analytics exist | Resolved. Every metric table now names the measurement method and the section opens by stating that no number is currently measured |
@@ -1473,10 +1514,7 @@ This section is worth more than the confident parts of the document.
 
 ### Work in progress
 
-- `initialconcept.txt` is present in the working tree and untracked. It is the original
-  project brief and appears finished rather than half-written, but it has never been
-  committed. See open question 1.
-- There are no other uncommitted changes, no unmerged branches, no stubbed functions,
+- There are no uncommitted changes, no unmerged branches, no stubbed functions,
   and no half-finished features. Every function in the project is complete and every
   path in the UI leads somewhere.
 - There are no TODO, FIXME, or HACK markers anywhere in the codebase. This was checked
@@ -1487,21 +1525,26 @@ This section is worth more than the confident parts of the document.
 Numbered so they can be answered by reference. When one is answered, fold the answer
 into the relevant section and mark it answered here rather than deleting it.
 
-1. **`initialconcept.txt`:** should it be committed to the repository, or removed from
-   the folder structure in this document? It is currently documented as part of the
-   project but does not exist in git.
-2. **The v1.0.0 milestone:** does the version line track the codebase (still v0.1.x, as
-   the changelog says) or the public launch (v1.0.0, as the roadmap says)? The two
-   cannot both be right.
+1. **`initialconcept.txt`:** ~~should it be committed, or removed from the folder
+   structure?~~ **Answered 2026-08-31: removed.** The file was read, its content
+   confirmed to be fully covered by the Problem statement, then deleted and every
+   reference to it rewritten. Folded into Folder structure and the Problem statement.
+2. **The v1.0.0 milestone:** ~~does the version line track the codebase or the public
+   launch?~~ **Answered 2026-08-31: the version line is now v1.0.0.** The author chose
+   to bump rather than renumber the milestone. Folded into the Roadmap and the
+   versioning rule in Working practice.
 3. **"No gradients on content":** is the design rule "no gradients at all", making the
    logo and hero heading violations, or "no gradients inside a tool's working area",
    making them fine? The wording needs tightening either way.
 4. **Mobile navigation:** below 760px all four topbar links are hidden and tool page
    footers link only Home, so Projects and Support are unreachable from a tool page on a
    phone. Is that intended?
-5. **The dead Link Cleaner rules** (`" trk"` and `trkCampaign`): should they be fixed to
-   match, or were they intentionally disabled and left as a record? The leading space
-   suggests a typo rather than a decision.
+5. **The dead Link Cleaner rules** (`" trk"` and `trkCampaign`): ~~fix them or leave
+   them as a record?~~ **Answered 2026-08-31: fixed.** `" trk"` turned out to be a
+   duplicate of the already-working `"trk"` entry, so it was deleted rather than
+   trimmed; `trkCampaign` was lowercased. This is a behaviour change: a URL carrying
+   `trkCampaign` in any casing is now stripped where before it was passed through.
+   Folded into API design and the technical debt table.
 6. **Generic parameter names:** `amp`, `spm`, `scm`, and `trk` will strip parameters
    some sites use legitimately. Is that the right default, or should they move behind a
    future "aggressive mode" toggle?
@@ -1512,8 +1555,13 @@ into the relevant section and mark it answered here rather than deleting it.
    tenet 1, given it would send a page view to a third party?
 9. **External tool links:** should they be checked periodically? There is no link
    checker and a moved external tool would 404 silently.
-10. **Git tags:** should each patch note version be tagged in git? Today a version
-    number maps to a commit only by reading dates and messages.
+10. **Git tags:** ~~should each patch note version be tagged?~~ **Answered 2026-08-31:
+    yes, and backfilled.** Annotated tags v0.1.3 through v0.2.0 were created against
+    their original commits, each carrying the committer date of the commit it points at
+    rather than the date the tag was made. v0.1.0, v0.1.1, and v0.1.2 have no tag: they
+    predate the repository, whose first commit is already labelled v0.1.3, so there is
+    no commit to point at and inventing one would be a lie. Folded into Commit
+    conventions.
 
 ---
 
@@ -1526,8 +1574,9 @@ Concrete instructions for anyone, human or model, doing future work in this proj
 1. Read this file's Conventions section. The house style is not obvious from a single
    file, and it is stricter than it looks (ES5 syntax by choice, IIFE per file, double
    quotes, 2-space indent, no logging).
-2. Run `git status` and confirm the tree is clean apart from `initialconcept.txt`, which
-   is expected to be untracked (see open question 1).
+2. Run `git status` and confirm the tree is clean. As of v1.0.0 there are no expected
+   untracked files, so anything `git status` reports is either yours or a stray test
+   harness that should have been deleted.
 3. Open the file you intend to change and read the whole thing. Every file in this
    project is small enough to read completely, and none of them is safe to skim.
 
@@ -1661,7 +1710,10 @@ hand.
 ### What to update afterwards
 
 - **`PATCHNOTES.md`, every time.** Every change gets an entry, including small fixes.
-  Bump the patch number for a fix, the minor number for a new tool or a visible feature.
+  Bump the patch number for a fix, the minor number for a new tool or a visible feature,
+  and the major number only for a change that breaks a public surface as defined in
+  Deprecation and removal. The project reached v1.0.0 on 2026-08-31, so it is past the
+  pre-1.0 convention under which a minor bump was allowed to carry a breaking change.
   Use the Added, Changed, Fixed, Removed sections and write each line in the past tense.
 - **This file**, when a tool ships, a tenet changes, the roadmap moves, a convention
   shifts, or a discrepancy is resolved.

@@ -5,6 +5,186 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v1.0.0 - 2026-08-31
+
+First stable release. The major bump is not a marketing gesture: it settles a version
+number that had been contradicting itself since v0.1.4, and it lands the accessibility
+pass that was the last thing standing between the site and a version it could defend.
+
+Every open question that was gating work in `PRD.md` was answered by the author in this
+release. Four of them are recorded below as decisions with their reasoning, so the
+reasoning survives even after the questions are folded away.
+
+### Added
+- Added a skip-to-content link to all five pages. `.skip-link` is the first element
+  inside `<body>` and the first thing the keyboard reaches, sitting off-screen at
+  `top: -60px` until focused and transitioning to `top: 12px`. Every `<main>` gained
+  `id="main"` to receive it. Both halves are required: the anchor alone goes nowhere and
+  the id alone is unreachable
+- Added a `prefers-reduced-motion: reduce` block as the last rule in `css/style.css`.
+  Two details are load-bearing. It is last in the file because it has to win over every
+  transition above it, and it sets durations to 1ms rather than 0 so that
+  `transitionend` still fires. A handler waiting on that event would never run under a
+  true zero, which would turn a user's accessibility preference into a broken feature
+- Added `role="status"` to the toast, set in `js/common.js` where the element is
+  created rather than in markup, so all five pages inherit it from a single line. The
+  role implies `aria-live="polite"` and `aria-atomic="true"`, which is the right pairing:
+  polite because a toast never interrupts, atomic because the message only means
+  anything read whole. The toast is the only feedback channel in the project, so until
+  now every copy and every download succeeded silently for screen reader users
+- Added an `.sr-only` visually-hidden utility class, using the clip-plus-1px-box
+  technique rather than `display: none` or `visibility: hidden`, both of which remove an
+  element from the accessibility tree along with the screen
+- Added `<label class="sr-only" for="fav-input">Website address</label>` and
+  `<label class="sr-only" for="md-input">Markdown source</label>`, closing the last two
+  unlabelled inputs. `DESIGN.md` has claimed since v0.1.0 that every form input has an
+  associated label; as of this release that claim is true
+- Added `role="region"` and `aria-label="Rendered preview"` to `.md-preview`
+- Added a replacement focus indicator to `#md-input`, which previously set
+  `outline: none` with nothing in its place. It is an inset ring,
+  `box-shadow: inset 0 0 0 2px var(--accent-soft)`, inset because the textarea runs edge
+  to edge inside its pane and a normal outline would sit half outside it
+- Added annotated git tags for every release from v0.1.3 to v0.2.0, each carrying the
+  committer date of the commit it points at rather than the date the tag was created.
+  v0.1.0, v0.1.1, and v0.1.2 have no tag and never will: they predate the repository,
+  whose first commit is already labelled v0.1.3, so there is no commit to point at
+- Added a "Skip link" component section to `docs/DESIGN.md`, including why it is
+  positioned rather than clipped and must not be merged with `.sr-only`
+
+### Changed
+- Changed the version line to v1.0.0. Since v0.1.4 the roadmap had carried a milestone
+  reading "v1.0.0 - Public deployment to GitHub Pages, Complete" while `PATCHNOTES.md`
+  was still at v0.1.x and had never recorded a v1.0.0 entry. The two records could not
+  both be right. The launch was real and happened on 2026-06-27, but it is recorded here
+  as v0.1.4, so the milestone row has been relabelled v0.1.4 and the number v1.0.0
+  reassigned to the release that earned it. Nothing about the launch was deleted; only
+  the label moved
+- Changed the section captions "The tools" and "Why these tools?" on `index.html`, "The
+  numbers" and "Against common limits" on `character-counter.html`, and the dynamic
+  results caption in `favicon-downloader.html` from `<p class="section-label">` to real
+  `<h2>` elements. The landing page previously jumped straight from the hero `<h1>` to
+  the tool cards' `<h3>`, breaking the outline a screen reader builds from headings.
+  These captions looked and read like headings without being headings. No CSS change was
+  needed, because `.section-label` already sets its own `font-size` and `margin` and so
+  overrides the browser's `h2` defaults completely
+- Changed the type-scale selector from `label.lbl` to `.lbl`, and its
+  `margin-bottom: 7px` to the `margin: 0 0 7px` shorthand. A `<label>` is only correct
+  when it names a form control, and a `<p>` carries a default top margin that a
+  `<label>` does not
+- Changed the Link Cleaner's "Cleaned URL" caption from a `<label>` with no `for` target
+  to a `<p class="lbl">`. It captions a `<div>`, so calling it a label told screen
+  readers there was a form field there when there was not
+- Changed `docs/PRD.md` from four open discrepancies to one. Rows 5, 6, and 7 of the
+  Documentation versus reality table are now resolved, and open questions 1, 2, 5, and
+  10 are answered in place with their answers rather than deleted
+- Changed the git tag convention in `docs/PRD.md` from "none exist" to a standing rule:
+  annotated, one per release, named `vMAJOR.MINOR.PATCH`, created as part of shipping
+  rather than later
+- Changed the versioning rule in `docs/PRD.md` to define a major bump, which had no
+  definition while the project was pre-1.0. A major bump is now reserved for a change
+  that breaks a public surface as defined in Deprecation and removal
+- Changed "Search or filter on the landing page" from Explicitly deferred to the Future
+  feature list. Its stated trigger, eight or more tools, is now met at four hosted and
+  four external cards. It is the next platform item due
+- Changed the mobile navigation gap from an unranked known gap to the single remaining
+  open accessibility item, in both `docs/PRD.md` and `docs/DESIGN.md`. It is the one
+  thing this pass did not close, because it needs a design decision about what mobile
+  navigation should be rather than an attribute on an existing element
+
+### Fixed
+- Fixed two Link Cleaner tracking rules that could never match. `" trk"` carried a
+  leading space and `trkCampaign` carried capitals, while `shouldRemove` lowercases the
+  incoming key but does not trim it, so both had been dead since v0.1.0. `" trk"` was
+  deleted rather than trimmed, because `"trk"` was already present on the same line and
+  the obvious fix would have produced a duplicate in a `Set`; `trkCampaign` became
+  `trkcampaign`. **This is a visible behaviour change:** a URL carrying `trkCampaign` in
+  any casing is now stripped where it previously passed through untouched. The exact
+  list is 47 entries and all 47 work, down from 48 of which 46 did
+- Fixed the accessibility claim in `docs/DESIGN.md` that "form inputs have associated
+  `<label>` elements", not by softening the document but by making the code match it.
+  The v0.1.8 audit kept the rule and recorded the gap rather than relaxing the rule to
+  fit the code, which is the reason it was still there to close
+
+### Removed
+- Removed `initialconcept.txt`. It was the original one-paragraph brief, present in the
+  working tree, referenced by the documentation, and never once committed to git. The
+  file was read before deletion and its content confirmed to be already captured in the
+  Problem statement of `docs/PRD.md`: the three inspiration URLs
+  (markdownlivepreview.com, folge.me's favicon downloader, linkcleaner.app) and both
+  original constraints, that every tool runs natively in the browser with no server-side
+  process and that the stack is plain HTML, CSS, and JavaScript. That paragraph is now
+  the record of the brief. Every reference to the file across `docs/PRD.md` was rewritten
+  to describe it in the past tense
+- Removed the dead `" trk"` entry from the Link Cleaner exact-name set, as described
+  under Fixed
+- Removed five closed items from the technical debt table in `docs/PRD.md`: the dead
+  Link Cleaner rules, `prefers-reduced-motion`, the skip link, the toast role, and the
+  unlabelled inputs. The mobile navigation gap replaced them as a single row
+
+### Decisions recorded
+- **The Markdown preview deliberately did not get `aria-live`, and the roadmap item
+  asking for it was wrong.** The pane re-renders on every keystroke. An `aria-live`
+  region announces its content each time it changes, so a screen reader user typing a
+  paragraph would hear the entire document read back after every character, which is
+  worse than the silence it was meant to fix. It got `role="region"` and an
+  `aria-label` instead, making it a named landmark that can be jumped to and read on
+  demand. If this is ever revisited, the correct pattern is a debounced
+  `aria-live="polite"` region carrying a short summary such as "preview updated, 12
+  paragraphs", never the rendered document. The general rule now recorded in
+  `DESIGN.md`: a live region is for content that changes on the system's schedule, not
+  on the user's
+- **A standing rule came out of the dead tracking rules:** every entry in the Link
+  Cleaner's `EXACT` set must be lowercase with no surrounding whitespace. `shouldRemove`
+  lowercases but does not trim, so the set is the only place that invariant can be
+  enforced, and it is enforced by eye. A violating entry does not throw and does not
+  warn, it silently does nothing, which is precisely how two of them survived four
+  months and eight releases unnoticed
+- **A standing rule came out of the focus fix:** never remove a focus outline without
+  putting something visible in its place in the same rule
+- **A standing rule came out of the heading fix:** `.section-label` is a heading style,
+  so the element wearing it must be a real heading at the correct level
+
+### Verification
+- A structural accessibility audit was written for this release and run against all five
+  pages under headless Edge. It fetches each page, parses it with `DOMParser`, and
+  asserts on `lang`, landmark elements, exactly one `h1`, heading-level order, duplicate
+  ids, `img` `alt`, form-control labelling, accessible names on every button and link,
+  orphan labels, and the presence of a skip link. Before the changes it reported nine
+  findings across the five pages. After them, all five pages report clean
+- **The Lighthouse target on the accessibility milestone was not met and is not claimed.**
+  Lighthouse requires Node, and Node is not installed on the maintenance machine. The
+  structural audit above is a real result and it is not a Lighthouse score: Lighthouse
+  also measures colour contrast, tap-target size, and viewport behaviour, none of which
+  the harness checks. The honest position is that every structural gap this project had
+  written down is now closed and the numeric target stays open. That item should not be
+  marked met until a real score exists
+- Six assertions against `js/linkcleaner.js` covering the repaired entries: mixed-case
+  `trkCampaign`, upper-case `TRKCAMPAIGN`, and bare `trk` are all stripped from one URL
+  while a legitimate parameter survives; the prefix path and an unrelated exact match
+  still work. A seventh assertion failed and was withdrawn rather than chased, because it
+  asserted the wrong thing about pre-existing behaviour: `cleanUrl` prepends `https://`
+  to input without a scheme, so a string of words parses as a URL rather than returning
+  `valid: false`. That is unchanged by this release
+- All five pages rendered under headless Edge with their scripts running to completion,
+  confirmed by the injected copyright year and the skip link being present on each
+- No em dashes in any modified file, in any of the three prohibited forms. The remaining
+  matches for `&mdash;` and ` -- ` in `docs/PRD.md` are the rule text naming the
+  character it prohibits and two shell commands where `--` is argument syntax, both of
+  which the writing style rule explicitly exempts
+- The audit harness was deleted before committing, as the rule in `PRD.md` requires. It
+  was never part of the repository
+
+### Not changed, and why
+- The initial commit message still contains an em dash. Unchanged for the same reason as
+  in v0.1.8: git history is a historical record and rewriting `master` to correct
+  punctuation would mean force-pushing the deploy branch
+- The Markdown image `src` protocol whitelist (open question 7), the generic parameter
+  names `amp`, `spm`, `scm`, and `trk` (open question 6), analytics (open question 8),
+  and external link checking (open question 9) remain open. None of them was in scope for
+  this release and none is blocked
+
+---
+
 ## v0.2.0 - 2026-08-31
 
 First tool of the v0.2.0 batch. Minor version bump rather than a patch, per the rule in

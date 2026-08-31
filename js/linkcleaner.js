@@ -8,7 +8,7 @@
     "s_cid", "ml_subscriber", "ml_subscriber_hash", "spm", "scm",
     "ref_src", "ref_url", "fb_action_ids", "fb_action_types", "fb_ref",
     "fb_source", "action_object_map", "action_type_map", "action_ref_map",
-    "gs_l", "amp", "_ga", "_gl", " trk", "trk", "trkCampaign", "sc_channel",
+    "gs_l", "amp", "_ga", "_gl", "trk", "trkcampaign", "sc_channel",
     "sc_campaign", "sc_geo", "sc_country", "sc_outcome", "ttclid", "li_fat_id"
   ]);
 

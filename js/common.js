@@ -30,6 +30,10 @@
     if (!toastEl) {
       toastEl = document.createElement("div");
       toastEl.className = "toast";
+      // role="status" implies aria-live="polite" and aria-atomic="true", so
+      // screen readers announce the message. The toast is the only feedback
+      // channel in the project; without this it is silent to them.
+      toastEl.setAttribute("role", "status");
       document.body.appendChild(toastEl);
     }
     toastEl.textContent = msg;

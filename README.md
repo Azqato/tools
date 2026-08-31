@@ -77,9 +77,11 @@ exception: it needs a connection, because it asks a public icon service for the 
 
 ## Current status
 
-Live and actively developed. Three in-browser tools are finished and working, and new
-ones are added when they can meet the same standard: useful, fast, and doing all their
-work on your device rather than someone's server.
+Live, stable, and actively developed. Four in-browser tools are finished and working,
+and new ones are added when they can meet the same standard: useful, fast, and doing all
+their work on your device rather than someone's server. The site has had a full
+accessibility pass, so every page can be navigated by keyboard alone, works with a screen
+reader, and respects a reduced-motion setting.
 
 ---
 

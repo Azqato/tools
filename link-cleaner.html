@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <header class="topbar">
     <div class="wrap">
       <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
@@ -24,7 +25,7 @@
     </div>
   </header>
 
-  <main class="page wrap">
+  <main id="main" class="page wrap">
     <div class="page-head">
       <div class="crumb"><a href="index.html">Tools</a> / Link Cleaner</div>
       <h1>Link Cleaner</h1>
@@ -43,7 +44,7 @@
       </div>
 
       <div class="lc-result" id="lc-result">
-        <label class="lbl" style="margin-top:22px;">Cleaned URL</label>
+        <p class="lbl" style="margin-top:22px;">Cleaned URL</p>
         <div class="lc-out" id="lc-out"></div>
         <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
           <button class="btn sm primary" id="lc-copy">Copy clean link</button>

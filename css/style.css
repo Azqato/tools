@@ -184,13 +184,31 @@ a:hover { text-decoration: underline; }
 }
 textarea.field { resize: vertical; line-height: 1.55; }
 
-label.lbl {
+/* .lbl is element-agnostic on purpose. A <label> is only correct when it names
+   a form control; a read-only output pane needs the same look without the
+   semantics, so it uses <p class="lbl">. */
+.lbl {
   display: block;
   font-size: .82rem;
   font-weight: 600;
   color: var(--text-soft);
-  margin-bottom: 7px;
+  margin: 0 0 7px;
   letter-spacing: .01em;
+}
+
+/* Visible to screen readers, invisible on screen. Used where a control's
+   purpose is obvious in the layout but has no on-screen text to point at. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ---- Page scaffold -------------------------------------------------------- */
@@ -421,7 +439,11 @@ label.lbl {
   background: transparent;
   color: var(--text);
 }
-#md-input:focus { outline: none; }
+/* The native outline is dropped because the textarea runs edge to edge inside
+   its pane and an outline would sit half outside it. An inset ring in the same
+   --accent-soft the .field focus state uses replaces it, so the indicator is
+   never removed without a substitute. */
+#md-input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent-soft); }
 .md-preview {
   flex: 1;
   padding: 22px 24px;
@@ -642,4 +664,39 @@ label.lbl {
   #md-input { min-height: 280px; }
   .md-preview { min-height: 280px; }
   .nav-link.hide-sm { display: none; }
+}
+
+/* ---- Skip link ------------------------------------------------------------
+   First focusable element on every page. Off-screen until focused, so it costs
+   sighted users nothing and saves keyboard users the whole topbar. */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 200;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top .15s ease;
+}
+.skip-link:focus { top: 12px; }
+
+/* ---- Reduced motion -------------------------------------------------------
+   Last block in the file on purpose: it has to win over every transition
+   declared above it, and it is a user preference rather than a component.
+   Durations go to 1ms rather than 0 so that transitionend still fires and any
+   handler waiting on it is not left hanging. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <header class="topbar">
     <div class="wrap">
       <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
@@ -24,7 +25,7 @@
     </div>
   </header>
 
-  <main class="page wrap">
+  <main id="main" class="page wrap">
     <div class="page-head">
       <div class="crumb"><a href="index.html">Tools</a> / Markdown Editor</div>
       <h1>Markdown Editor</h1>
@@ -54,11 +55,12 @@
           <span>Markdown</span>
           <span id="md-count">0 chars</span>
         </div>
+        <label class="sr-only" for="md-input">Markdown source</label>
         <textarea id="md-input" spellcheck="false" placeholder="# Start typing Markdown…"></textarea>
       </div>
       <div class="md-pane">
         <div class="pane-head"><span>Preview</span></div>
-        <div class="md-preview"><div class="md-body" id="md-output"></div></div>
+        <div class="md-preview" role="region" aria-label="Rendered preview"><div class="md-body" id="md-output"></div></div>
       </div>
     </div>
   </main>

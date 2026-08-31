@@ -1,6 +1,6 @@
 # Design System - Azqato's Tools
 
-**Last verified against the code:** 2026-08-25, updated 2026-08-31 for v0.2.0 (`css/style.css`, 645 lines, ~16.6KB)
+**Last verified against the code:** 2026-08-31 for v1.0.0 (`css/style.css`, 702 lines, ~18.2KB)
 
 Every value in this document was read out of `css/style.css` or the five HTML pages
 rather than inferred. Where the code and an earlier version of this document
@@ -146,7 +146,7 @@ output box, the parameter chips, and the inline-code toolbar button glyph.
 | Body large | `.hero p` | `1.12rem` | 400 | 1.6 | 0 | Hero subtext, `max-width: 56ch` |
 | Body soft | `.page-head p` | `1rem` | 400 | 1.6 | 0 | Color `--text-soft`, `max-width: 65ch` |
 | Card body | `.tool-card p` | `0.92rem` | 400 | 1.6 | 0 | Color `--text-soft` |
-| Label | `label.lbl` | `0.82rem` | 600 | default | `.01em` | Block-level, above the field |
+| Label | `.lbl` | `0.82rem` | 600 | default | `.01em` | Block-level, above the field. Element-agnostic, see below |
 | Section label | `.section-label` | `0.82rem` | 700 | default | `.06em` | Uppercase, `--text-faint` |
 | Pane header | `.md-pane .pane-head` | `0.78rem` | 700 | default | `.05em` | Uppercase, `--text-faint` |
 | Nav link | `.nav-link` | `0.92rem` | 500 | default | 0 | Topbar links |
@@ -407,24 +407,43 @@ The entire card is therefore one focusable, clickable target.
   native `outline` removed
 - `textarea.field` restricts resizing to `vertical` and sets `line-height: 1.55`
 
-`label.lbl` is a block-level label placed above the field: `0.82rem`, weight 600,
-`--text-soft`, `margin-bottom: 7px`.
+`.lbl` is a block-level label placed above the field: `0.82rem`, weight 600,
+`--text-soft`, `margin: 0 0 7px`.
 
-> **Discrepancy (open).** An earlier version of this document stated that "form inputs
-> have associated `<label>` elements". Reading the pages, that is true for one field and
-> false for three:
+The selector is `.lbl`, not `label.lbl`. That is deliberate and it changed in v1.0.0.
+A `<label>` element is only correct when it names a form control; using one to caption a
+read-only output pane tells a screen reader there is a field there when there is not.
+The Link Cleaner's "Cleaned URL" caption is exactly that case and is now a
+`<p class="lbl">`. Loosening the selector is what let the markup be honest without
+losing the styling, and it is why `margin-bottom: 7px` became the `margin: 0 0 7px`
+shorthand: a `<p>` carries a default top margin that a `<label>` does not.
+
+**Rule:** use `<label class="lbl" for="...">` when there is a control to point at, and
+`<p class="lbl">` when there is not. Never a `<label>` without a target.
+
+`.sr-only` is the visually-hidden utility, added in v1.0.0. It uses the standard
+clip-plus-1px-box technique rather than `display: none` or `visibility: hidden`, both of
+which remove the element from the accessibility tree along with the screen. Use it where
+a control's purpose is obvious from the layout but there is no on-screen text to name
+it, which today is `#fav-input` and `#md-input`. It is not a licence to skip visible
+labels: a visible label is still the default, and `.sr-only` is the exception the layout
+has to earn.
+
+> **Resolved in v1.0.0.** This document used to claim that "form inputs have associated
+> `<label>` elements" while only one of four actually did. The v0.1.8 audit kept the rule
+> and wrote the gap down rather than relaxing the rule to match the code. v1.0.0 closed
+> it, and the rule as originally written is now true:
 >
-> - `link-cleaner.html` `#lc-input` has `<label class="lbl" for="lc-input">`. Correct.
-> - `link-cleaner.html` has a second `<label class="lbl">Cleaned URL</label>` with no
->   `for` and no wrapped control. It labels a `<div>`, so it is decorative markup that
->   happens to use a label element.
-> - `favicon-downloader.html` `#fav-input` has a `placeholder` and no label at all.
-> - `markdown-preview.html` `#md-input` has a `placeholder` and no label at all.
+> - `#lc-input` and `#cc-input` have `<label class="lbl" for="...">`. Unchanged, they
+>   were always correct.
+> - `#fav-input` gained `<label class="sr-only" for="fav-input">Website address</label>`.
+> - `#md-input` gained `<label class="sr-only" for="md-input">Markdown source</label>`.
+> - The Link Cleaner's "Cleaned URL" caption was a `<label>` with no target. It is now a
+>   `<p class="lbl">`, which is why the type-scale selector loosened from `label.lbl`
+>   to `.lbl`.
 >
-> The code is the truth about what is; the document was stating the intent. The rule to
-> follow going forward is the documented one (every field gets a label). The three
-> unlabelled fields are recorded as accessibility gaps below rather than the rule being
-> relaxed to match them.
+> Verified by a structural audit that parses all five pages and asserts every
+> `input`, `textarea`, and `select` resolves to an accessible name. All five pass.
 
 ### Toast notifications
 
@@ -443,10 +462,27 @@ modal, and no banner component. Validation failures, clipboard failures, and suc
 confirmations all speak through it. A new tool should not invent a second feedback
 pattern without a reason recorded in `PATCHNOTES.md`.
 
-> **Known gap.** The toast is not an ARIA live region, so screen readers do not announce
-> it. Since it is the only feedback mechanism, a screen reader user gets no confirmation
-> that a copy or a download succeeded. Adding `role="status"` where the element is
-> created in `common.js` would fix this in one line.
+> **Closed in v1.0.0.** The toast now carries `role="status"`, set in `common.js` at the
+> point the element is created rather than in markup, so all five pages inherit it from
+> one line and a sixth page gets it for free. `role="status"` implies
+> `aria-live="polite"` and `aria-atomic="true"`, which is the right pairing here: polite
+> because a toast never interrupts anything the user is doing, and atomic because the
+> message is one short sentence that only makes sense read whole.
+
+### Skip link
+
+`.skip-link` is the first element inside `<body>` on every page and the first thing the
+keyboard reaches. It sits at `top: -60px` until focused, then transitions to `top: 12px`
+using the same 150ms ease as everything else in the system. It is an `--accent`
+background with white text at the standard `10px` radius, so it reads as a button
+because that is what it behaves like.
+
+It is positioned rather than clipped, which is different from `.sr-only`. A skip link
+has to become visible when focused, so it needs somewhere to travel from; `.sr-only`
+never becomes visible and so uses clipping instead. Do not merge the two.
+
+Every page's `<main>` carries `id="main"` to receive it. A new page needs both halves:
+the anchor after `<body>` and the id on `<main>`. Neither works alone.
 
 ### Empty state
 
@@ -627,17 +663,59 @@ one.
 Recorded here rather than in a backlog so that anyone reading this file sees them before
 adding to the pile:
 
-1. No skip-to-main-content link on any page.
-2. No ARIA live region on the Markdown preview pane, so screen readers do not announce
-   the rendered output as it updates.
-3. No `role="status"` on the toast, so no feedback message is announced.
-4. `#fav-input` and `#md-input` have no `<label>`, only a `placeholder`.
-5. The "Cleaned URL" label in `link-cleaner.html` is a `<label>` with no `for` target.
-6. `#md-input:focus` removes the outline without providing a replacement indicator.
-7. `prefers-reduced-motion` is not handled anywhere in the CSS, and
-   `html { scroll-behavior: smooth }` is applied unconditionally.
-8. Below 760px there is no navigation on tool pages except the brand link and the footer
-   Home link.
+**Closed in v1.0.0.** Gaps 1 through 7 below were all closed by the v1.0.0
+accessibility pass. They are kept here rather than deleted, because the record of what
+was wrong is the reason the rules that replaced them exist.
+
+1. ~~No skip-to-main-content link on any page.~~ Closed. `.skip-link` is the first
+   focusable element on all five pages, off-screen until focused, targeting `#main`.
+2. ~~No ARIA live region on the Markdown preview pane.~~ Closed, but **not** by adding
+   `aria-live`, which would have been the wrong fix. See the note below.
+3. ~~No `role="status"` on the toast.~~ Closed in `common.js`.
+4. ~~`#fav-input` and `#md-input` have no `<label>`.~~ Closed with `.sr-only` labels.
+5. ~~The "Cleaned URL" label is a `<label>` with no `for` target.~~ Closed. It is a
+   `<p class="lbl">`.
+6. ~~`#md-input:focus` removes the outline without a replacement indicator.~~ Closed.
+   It now sets `box-shadow: inset 0 0 0 2px var(--accent-soft)`, an inset ring because
+   the textarea runs edge to edge inside its pane and a normal outline would sit half
+   outside it. The rule this makes standing: **never remove a focus outline without
+   putting something visible in its place in the same rule.**
+7. ~~`prefers-reduced-motion` is not handled anywhere in the CSS.~~ Closed. See
+   Animation and motion.
+8. **Still open.** Below 760px there is no navigation on tool pages except the brand
+   link and the footer Home link, so Projects and Support are unreachable from a tool
+   page on a phone. This is the one gap v1.0.0 did not close, because it needs a design
+   decision about what mobile navigation should be rather than an attribute on an
+   existing element. Tracked as open question 4 in `PRD.md`.
+
+Two things were also fixed that were never on this list, both found by the structural
+audit run for v1.0.0 rather than by reading:
+
+9. **Heading order.** `index.html` went straight from the hero `<h1>` to the tool cards'
+   `<h3>` with no `<h2>` between them, which breaks the outline a screen reader builds
+   from headings. The section captions above each block, "The tools" and "Why these
+   tools?", were `<p class="section-label">`: they looked like headings and read like
+   headings but were not headings. They are now `<h2 class="section-label">`, as are the
+   two on `character-counter.html` and the dynamic results caption in
+   `favicon-downloader.html`. **The rule this produces: `.section-label` is a heading
+   style, so the element wearing it must be a real heading at the right level.** It
+   needed no CSS change, because `.section-label` already sets its own `font-size` and
+   `margin` and so overrides the browser's `h2` defaults completely.
+10. Nothing else. Every other check the audit runs passed on the first attempt: `lang`
+    on every `<html>`, `<main>`, `<header>` and `<footer>` on every page, exactly one
+    `<h1>` per page, no duplicate ids anywhere, `alt` on every `<img>`, and an accessible
+    name on every button and every link.
+
+> **The Markdown preview deliberately has no `aria-live`.** Gap 2 asked for one and the
+> answer is no. The pane re-renders on every keystroke, and an `aria-live` region
+> announces its content each time it changes, so a screen reader user typing a paragraph
+> would hear the whole document read back after every character. That is worse than the
+> silence it was meant to fix. The pane instead has `role="region"` and
+> `aria-label="Rendered preview"`, making it a named landmark that can be jumped to and
+> read on demand. If this is revisited, the pattern to reach for is a debounced
+> `aria-live="polite"` region holding a short summary such as "preview updated, 12
+> paragraphs", never the rendered document itself. **The general rule: a live region is
+> for content that changes on the system's schedule, not on the user's.**
 
 ---
 
@@ -670,10 +748,19 @@ it, though naming the properties would be marginally cheaper to composite.
 - The only `transform` values in the system are the `.tool-card` hover lift, the 1px
   button press, and the toast's slide. Nothing else moves in space.
 
-> **Known gap (repeated from Accessibility).** `prefers-reduced-motion: reduce` is not
-> honoured. The correct fix is one block that zeroes `transition-duration`,
-> `animation-duration`, and `scroll-behavior` under that query. It is on the v0.3.0
-> roadmap in `PRD.md`.
+> **Closed in v1.0.0.** `prefers-reduced-motion: reduce` is now honoured by the last
+> block in `css/style.css`. Two details are deliberate and should survive any edit to
+> it. It is **last in the file** because it has to win over every transition declared
+> above it, and it leans on `!important` for the same reason; moving it up the file
+> silently weakens it. And it sets durations to **1ms rather than 0**, so that
+> `transitionend` still fires. A handler waiting on that event would never run under a
+> true zero, which turns an accessibility preference into a broken feature.
+>
+> The block covers `animation-duration`, `animation-iteration-count`,
+> `transition-duration`, and `scroll-behavior`, applied to `*`, `*::before`, and
+> `*::after`. It is written against the universal selector on purpose: the alternative
+> is enumerating the seven transitions in the table above, which would then need editing
+> every time a new component adds one, and would be forgotten.
 
 ---
 
