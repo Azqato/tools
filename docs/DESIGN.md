@@ -1,6 +1,6 @@
 # Design System - Azqato's Tools
 
-**Last verified against the code:** 2026-08-31 for v1.0.0 (`css/style.css`, 702 lines, ~18.2KB)
+**Last verified against the code:** 2026-08-31 for v1.1.0 (`css/style.css`, 773 lines, ~20.4KB)
 
 Every value in this document was read out of `css/style.css` or the five HTML pages
 rather than inferred. Where the code and an earlier version of this document
@@ -469,6 +469,34 @@ pattern without a reason recorded in `PATCHNOTES.md`.
 > because a toast never interrupts anything the user is doing, and atomic because the
 > message is one short sentence that only makes sense read whole.
 
+### Mobile navigation
+
+`.nav-toggle` is an `.icon-btn` that is `display: none` by default and becomes
+`inline-grid` inside the 760px media query, immediately below the `.nav-link.hide-sm`
+rule that hides the desktop links. **The two rules are a pair and must be edited
+together:** the links leave at exactly the width the button arrives, so exactly one route
+to the navigation exists at any viewport size. Separating them strands the navigation at
+some width, which is the bug v1.1.0 existed to fix.
+
+The button swaps its own icon through `[aria-expanded="true"]` rather than through a
+JavaScript class, so the visual state cannot drift from the state screen readers are
+told about. There is one source of truth and it is the ARIA attribute.
+
+`.nav-menu` is the panel: absolutely positioned against `.topbar`, which is
+`position: sticky` and therefore already a containing block, so no extra wrapper was
+needed. It uses the `hidden` attribute for its state, with `.nav-menu[hidden]` and
+`.nav-menu:not([hidden])` both written out explicitly. **This is not optional
+verbosity.** The browser's own `[hidden] { display: none }` rule is outranked by any
+author rule that sets `display`, so a bare `.nav-menu { display: flex }` would leave the
+menu permanently open. The same trap applies to `.tool-card[hidden]`, which exists for
+exactly this reason.
+
+Behaviour lives in `js/common.js`, not in five inline scripts, so the topbar behaves
+identically everywhere and a sixth page inherits it by copying markup alone. It closes on
+a second click, on a click outside, on Escape, and on any link inside it. The Escape
+handler returns focus to the button, because leaving focus on an element that has just
+become `display: none` drops the user back to the top of the document.
+
 ### Skip link
 
 `.skip-link` is the first element inside `<body>` on every page and the first thing the
@@ -483,6 +511,24 @@ never becomes visible and so uses clipping instead. Do not merge the two.
 
 Every page's `<main>` carries `id="main"` to receive it. A new page needs both halves:
 the anchor after `<body>` and the id on `<main>`. Neither works alone.
+
+### Tool search
+
+`.tool-search` is the filter above the landing grid, deferred by an explicit rule in
+`PRD.md` until eight or more tools existed. It is a `.field` with `padding-left: 40px`
+and an absolutely positioned icon, which is the pattern to reuse for any future field
+that needs an affordance inside it.
+
+Two decisions worth keeping. Matching runs against each card's **full text content**,
+cached once on load, not against its heading, so a description word finds a tool whose
+name does not contain it. And `.tool-count` carries `role="status"`, which is the
+opposite call from the Markdown preview: this is a short sentence that changes once per
+keystroke and is genuinely useful to hear, where the preview is a whole document that
+changes on the same schedule and would be unbearable. **The distinction is size and
+purpose, not update frequency.**
+
+`.tools-empty` spans the grid with `grid-column: 1 / -1` and names the total, so the
+empty state tells the user how many tools they would see if they cleared the box.
 
 ### Empty state
 
@@ -682,11 +728,9 @@ was wrong is the reason the rules that replaced them exist.
    putting something visible in its place in the same rule.**
 7. ~~`prefers-reduced-motion` is not handled anywhere in the CSS.~~ Closed. See
    Animation and motion.
-8. **Still open.** Below 760px there is no navigation on tool pages except the brand
-   link and the footer Home link, so Projects and Support are unreachable from a tool
-   page on a phone. This is the one gap v1.0.0 did not close, because it needs a design
-   decision about what mobile navigation should be rather than an attribute on an
-   existing element. Tracked as open question 4 in `PRD.md`.
+8. ~~Below 760px there is no navigation on tool pages except the brand link and the
+   footer Home link.~~ **Closed in v1.1.0.** A disclosure menu now appears at exactly the
+   breakpoint where the links disappear. **Every gap on this list is now closed.**
 
 Two things were also fixed that were never on this list, both found by the structural
 audit run for v1.0.0 rather than by reading:

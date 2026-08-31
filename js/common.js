@@ -23,6 +23,42 @@
     localStorage.setItem(KEY, next);
   });
 
+  // --- Mobile navigation -------------------------------------------------
+  // Lives here rather than in five inline scripts, so the topbar behaves the
+  // same on every page and a sixth page gets it for free.
+  var navBtn = document.getElementById("nav-toggle");
+  var navMenu = document.getElementById("nav-menu");
+
+  function setNav(open) {
+    if (!navBtn || !navMenu) return;
+    navMenu.hidden = !open;
+    navBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  if (navBtn && navMenu) {
+    navBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setNav(navMenu.hidden);
+    });
+
+    // Any link inside closes it. Same-page anchors would otherwise leave the
+    // menu covering the thing the user just jumped to.
+    navMenu.addEventListener("click", function (e) {
+      if (e.target.closest("a")) setNav(false);
+    });
+
+    document.addEventListener("click", function (e) {
+      if (navMenu.hidden) return;
+      if (!navMenu.contains(e.target)) setNav(false);
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape" || navMenu.hidden) return;
+      setNav(false);
+      navBtn.focus();  // focus would otherwise be left on a hidden element
+    });
+  }
+
   // --- Toast -------------------------------------------------------------
   var toastEl;
   var timer;

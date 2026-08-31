@@ -5,6 +5,82 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v1.1.0 - 2026-08-31
+
+Platform work, no new tools. Two items that had each been deferred behind a stated
+trigger, and both triggers had fired.
+
+### Added
+- Added a **mobile navigation** menu, closing the last open accessibility gap. Below
+  760px the four topbar links are hidden by `.hide-sm`, which left tool pages with no
+  route to Projects or Support on a phone. A `.nav-toggle` button now appears at exactly
+  that breakpoint, opening a `.nav-menu` panel holding the same four links. The show and
+  hide rules are deliberately adjacent in the stylesheet: the links leave at the width
+  the button arrives, so exactly one route to the navigation exists at any size
+- Added mobile navigation behaviour to `js/common.js` rather than to five inline
+  scripts, so the topbar behaves identically on every page and a sixth page inherits it
+  by copying markup alone. It closes on a second click, a click outside, Escape, and any
+  link inside it. The Escape handler returns focus to the button, because leaving focus
+  on an element that has just become `display: none` drops the user to the top of the
+  document. The whole block is guarded on the elements existing, so a page without the
+  markup is unaffected
+- Added **tool search** to the landing grid. This was deferred by an explicit rule until
+  eight or more tools existed, a condition met in v0.2.0 and now acted on. It filters on
+  each card's full text content, cached once on load, rather than on its heading, so a
+  description word like "tracking" finds the Link Cleaner even though the name does not
+  contain it
+- Added `.tool-count` as a `role="status"` live region reporting how many tools match.
+  This is the opposite call from the Markdown preview, which was deliberately denied a
+  live region in v1.0.0, and the two together set the rule now recorded in `DESIGN.md`:
+  the distinction is the size and purpose of the content, not how often it updates. A
+  short sentence that changes per keystroke is useful to hear; a whole rendered document
+  on the same schedule is unbearable
+- Added `.tools-empty`, the no-match state, spanning the grid with `grid-column: 1 / -1`
+  and naming the total so the user knows what clearing the box would restore
+- Added `.tool-card[hidden]` and the explicit `.nav-menu[hidden]` and
+  `.nav-menu:not([hidden])` rules. **These are load-bearing, not verbosity.** The
+  browser's own `[hidden] { display: none }` is outranked by any author rule that sets
+  `display`, and both elements set one. Without them the search would hide nothing and
+  the menu would never close
+- Added two checks to the accessibility audit harness, since v1.1.0 introduced the
+  project's first disclosure widget: every `aria-controls` must resolve to an element
+  that exists, and anything carrying `aria-controls` must also declare `aria-expanded`
+
+### Changed
+- Changed the milestone numbering. The Wash Sale Tracker moved from v1.2.0 to stay at
+  v1.2.0 and the Bookmark Manager moved from v1.1.0 to v1.3.0, so milestones now run in
+  the order they will ship. The v1.0.1 note predicted this: it recorded that the Wash
+  Sale Tracker was plausibly the smaller of the two and should move up if the two were
+  ever reordered by effort
+- Changed accessibility gap 8 in `docs/DESIGN.md` from open to closed. **Every gap on
+  that list is now closed**
+- Changed the roadmap direction answer in the `PRD.md` FAQ again, since the two platform
+  items it named as pending have now shipped
+
+### Fixed
+- Nothing. No existing behaviour changed, and no bug was found to fix
+
+### Removed
+- Removed the mobile navigation row from the technical debt table, replacing it with an
+  honest successor: page chrome now spans two files rather than one. The topbar markup is
+  still copy-pasted into five HTML files, and v1.1.0 widened it with a button and a
+  `<nav>`, so a navigation change is now five HTML edits plus a JavaScript edit that has
+  to stay in step. Putting all behaviour in `common.js` was the mitigation available
+  without a build step, which tenet 3 forbids
+
+### Verification
+- 23 assertions run in headless Edge against a real `index.html` loaded in an iframe,
+  driving the actual DOM rather than a reimplementation. Search: eight cards present, all
+  visible initially, a name match, a description-only match, a case-insensitive match, a
+  no-match showing the empty state and a zero count, and clearing restoring all eight.
+  Navigation: starts hidden with `aria-expanded="false"`, opens on click, closes on a
+  second click, on an outside click, on Escape, and on a link click, and holds four links
+- The structural accessibility audit passes clean on all five pages, including the two
+  new disclosure checks
+- The harnesses were deleted before committing, as the rule in `PRD.md` requires
+
+---
+
 ## v1.0.1 - 2026-08-31
 
 Documentation only. No code changed, nothing on the live site behaves differently.

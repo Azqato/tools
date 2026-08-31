@@ -664,7 +664,78 @@ textarea.field { resize: vertical; line-height: 1.55; }
   #md-input { min-height: 280px; }
   .md-preview { min-height: 280px; }
   .nav-link.hide-sm { display: none; }
+  /* Paired with .hide-sm above: the links leave, the button arrives. Editing
+     one without the other strands the navigation. */
+  .nav-toggle { display: inline-grid; }
 }
+
+/* ---- Mobile navigation ----------------------------------------------------
+   The topbar links carry .hide-sm and vanish below 760px, which left tool
+   pages with no way to reach Projects or Support on a phone. This is the
+   disclosure menu that replaces them. The button is hidden on desktop, where
+   the links are already visible, so only one of the two is ever present. */
+.nav-toggle { display: none; }
+.nav-toggle .x { display: none; }
+.nav-toggle[aria-expanded="true"] .bars { display: none; }
+.nav-toggle[aria-expanded="true"] .x { display: block; }
+
+.nav-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 22px;
+  left: 22px;
+  z-index: 60;
+  flex-direction: column;
+  padding: 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow);
+}
+/* Explicit rather than relying on the browser's [hidden] rule, which a bare
+   display:flex on the class would outrank. */
+.nav-menu[hidden] { display: none; }
+.nav-menu:not([hidden]) { display: flex; }
+.nav-menu a {
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: .95rem;
+  font-weight: 500;
+}
+.nav-menu a:hover { background: var(--bg-inset); text-decoration: none; }
+
+/* ---- Tool search ----------------------------------------------------------
+   Deferred until the grid held eight cards. It now does. Filters on the tool
+   name and its description, so "tracking" finds the Link Cleaner. */
+.tool-search {
+  position: relative;
+  max-width: 420px;
+  margin: 0 0 18px;
+}
+.tool-search .field { padding-left: 40px; }
+.tool-search svg {
+  position: absolute;
+  left: 13px; top: 50%;
+  width: 17px; height: 17px;
+  margin-top: -8.5px;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.tool-count {
+  margin: 0 0 18px;
+  font-size: .88rem;
+  color: var(--text-faint);
+}
+.tools-empty {
+  grid-column: 1 / -1;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-faint);
+}
+/* .tool-card sets display:flex, which outranks the browser rule for [hidden].
+   Without this the search would hide nothing. Same reason as .nav-menu above. */
+.tool-card[hidden] { display: none; }
 
 /* ---- Skip link ------------------------------------------------------------
    First focusable element on every page. Off-screen until focused, so it costs

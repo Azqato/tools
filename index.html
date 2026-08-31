@@ -21,11 +21,22 @@
       <a class="nav-link hide-sm" href="https://azqato.com/projects">Projects</a>
       <a class="nav-link hide-sm" href="https://azqato.github.io/tools/">Tools</a>
       <a class="nav-link hide-sm" href="https://azqato.github.io/support.html">Support</a>
+      <button class="icon-btn nav-toggle" id="nav-toggle" aria-label="Menu"
+              aria-expanded="false" aria-controls="nav-menu">
+        <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
       <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       </button>
     </div>
+      <nav class="nav-menu" id="nav-menu" aria-label="Site" hidden>
+        <a href="https://azqato.com/">Azqato</a>
+        <a href="https://azqato.com/projects">Projects</a>
+        <a href="https://azqato.github.io/tools/">Tools</a>
+        <a href="https://azqato.github.io/support.html">Support</a>
+      </nav>
   </header>
 
   <main id="main">
@@ -44,6 +55,15 @@
 
     <section class="wrap" id="tools">
       <h2 class="section-label">The tools</h2>
+
+      <div class="tool-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <label class="sr-only" for="tool-filter">Search the tools</label>
+        <input id="tool-filter" class="field" type="search" autocomplete="off"
+               placeholder="Search tools, e.g. markdown or tracking" />
+      </div>
+      <p class="tool-count" id="tool-count" role="status"></p>
+
       <div class="tools-grid">
 
         <a class="tool-card" href="markdown-preview.html">
@@ -118,6 +138,8 @@
           <span class="go">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></span>
         </a>
 
+        <p class="tools-empty" id="tools-empty" hidden>No tool matches that. Try a
+          shorter word, or clear the box to see all eight.</p>
       </div>
     </section>
 
@@ -147,7 +169,53 @@
     </div>
   </footer>
 
-  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // --- Tool search -------------------------------------------------------
+    // Deferred until the grid held eight cards, which it now does. Matching is
+    // on the card's whole text, so a description word like "tracking" finds the
+    // Link Cleaner even though the name does not contain it.
+    (function () {
+      var box = document.getElementById("tool-filter");
+      var count = document.getElementById("tool-count");
+      var empty = document.getElementById("tools-empty");
+      var cards = [].slice.call(document.querySelectorAll(".tools-grid .tool-card"));
+      var total = cards.length;
+
+      var haystacks = cards.map(function (card) {
+        return card.textContent.toLowerCase().replace(/\s+/g, " ");
+      });
+
+      function apply() {
+        var q = box.value.trim().toLowerCase();
+        var shown = 0;
+
+        cards.forEach(function (card, i) {
+          var hit = q === "" || haystacks[i].indexOf(q) !== -1;
+          card.hidden = !hit;
+          if (hit) shown++;
+        });
+
+        empty.hidden = shown !== 0;
+
+        // The count is the live region. It is a short sentence that changes on
+        // the user's own keystroke, so announcing it is useful rather than
+        // noisy, unlike announcing the filtered cards themselves.
+        if (q === "") {
+          count.textContent = "";
+        } else {
+          count.textContent = shown === 1
+            ? "1 tool matches \u201c" + box.value.trim() + "\u201d"
+            : shown + " tools match \u201c" + box.value.trim() + "\u201d";
+        }
+      }
+
+      box.addEventListener("input", apply);
+      box.value = "";
+      apply();
+    })();
+  </script>
   <script src="js/common.js"></script>
 </body>
 </html>

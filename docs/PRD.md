@@ -192,14 +192,9 @@ Tool candidates, all of which must be buildable with zero dependencies:
 
 Platform work:
 
-- Search or filter on the landing page tool grid. The trigger condition set for this,
-  eight or more tools, has now been met: the grid holds four hosted cards and four
-  external ones. It is the next platform item due
-- A visible mobile navigation. Below 760px all four topbar links are hidden and tool
-  page footers link only Home, so Projects and Support are unreachable from a tool page
-  on a phone. This is open question 4 and is the largest remaining accessibility gap
-  that the v1.0.0 pass did not close, because it is a design problem rather than an
-  attribute
+- ~~Search or filter on the landing page tool grid.~~ **Shipped in v1.1.0.**
+- ~~A visible mobile navigation.~~ **Shipped in v1.1.0**, closing the last accessibility
+  gap and answering open question 4.
 - Custom parameter rules in the Link Cleaner, so a user can add their own removals
 - A `/favicon.ico` fallback in the Favicon Downloader for when the Google service fails
 
@@ -348,8 +343,9 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 | v0.1.8 - Documentation audit and em dash sweep | 2026-08-25 | Complete |
 | v0.2.0 - Second tool batch, first tool shipped | 2026-08-31 | Complete |
 | v1.0.0 - Accessibility pass and first stable release | 2026-08-31 | Complete |
-| v1.1.0 - Bookmark Manager | TBD | Planned |
+| v1.1.0 - Platform: mobile navigation and tool search | 2026-08-31 | Complete |
 | v1.2.0 - Wash Sale Tracker | TBD | Planned |
+| v1.3.0 - Bookmark Manager | TBD | Planned |
 
 > **Resolved in v1.0.0.** This table used to carry a row reading "v1.0.0 - Public
 > deployment to GitHub Pages, Complete" while the changelog was still at v0.1.x, so the
@@ -376,7 +372,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 - One or two further tools from the Future list, exact tools not yet chosen
 - Landing page copy revisit once the grid exceeds eight cards
 
-### v1.1.0 planned: Bookmark Manager
+### v1.3.0 planned: Bookmark Manager
 
 A larger tool than anything shipped so far, and the first one that owns a user's data
 rather than transforming a single input, so it is given its own milestone rather than
@@ -498,11 +494,23 @@ forbids one, so ticker input is free text that is normalised (trimmed, uppercase
 than checked. The footer data-location line follows the pattern the other tools use, in
 the manner of "Your trades never leave your device".
 
-> **On ordering.** This sits at v1.2.0 because the Bookmark Manager was requested first,
-> not because it is larger. It is plausibly the smaller of the two: no file format parser,
-> no import or export, no folder tree, and a record of two fields against the Bookmark
-> Manager's tree of many. If the two are ever reordered by effort, this is the one that
-> moves up.
+> **On ordering.** This was originally placed after the Bookmark Manager because that
+> tool was requested first, with a note that it was plausibly the smaller of the two and
+> should move up if the two were ever reordered by effort. That is what happened: as of
+> v1.1.0 the Wash Sale Tracker is v1.2.0 and the Bookmark Manager is v1.3.0.
+
+### v1.1.0 platform work, complete 2026-08-31
+
+Two items that were not tools. Both had been deferred behind a stated trigger, and both
+triggers had fired.
+
+- **Mobile navigation.** A disclosure menu at the same 760px breakpoint where
+  `.hide-sm` removes the topbar links, so exactly one of the two is present at any
+  width. All behaviour is in `common.js`, guarded so a page without the markup is
+  unaffected. Closes the last accessibility gap and answers open question 4
+- **Tool search on the landing grid.** Deferred until eight or more tools existed, which
+  became true in v0.2.0. Filters on each card's full text rather than its title, so a
+  description word like "tracking" finds the Link Cleaner
 
 ### v1.0.0 accessibility pass, complete 2026-08-31
 
@@ -1118,7 +1126,7 @@ outbound links; no data is passed to them and no code is loaded from them.
 |------|---------------|-----------------|
 | Markdown code-span sentinel | `js/markdown.js` uses a literal NUL character (`"\0"`, embedded as a raw byte in the source) as the placeholder that protects inline code from the inline formatting rules | Use a long random string that cannot appear in user text. The NUL byte makes the file report as binary to some tools, which is why `grep` treats `markdown.js` as a binary file |
 | Image `src` not protocol-checked | Markdown links are whitelisted to safe protocols; image sources are only attribute-escaped | Apply the same whitelist to `src` |
-| No mobile navigation | Below 760px `.hide-sm` hides all four topbar links and tool page footers link only Home, so Projects and Support are unreachable from a tool page on a phone | A real answer, most likely a disclosure menu behind the existing icon button row. This is the one accessibility item the v1.0.0 pass did not close, because it needs a design decision rather than an attribute. See open question 4 |
+| Page chrome now spans two files | The topbar markup is copy-pasted into five HTML files and its behaviour lives in `common.js`. v1.1.0 widened that markup with a button and a `<nav>`, so a navigation change is now five HTML edits plus one JavaScript edit that must stay in step | Unchanged by the tenets: a build step would fix it and break tenet 3. The mitigation is that all behaviour went into `common.js` rather than into five inline scripts, so only the markup is duplicated |
 | Theme flash | `common.js` loads at the end of `<body>` while `<html>` hardcodes `data-theme="light"` | Move the localStorage read to an inline `<script>` in `<head>` |
 | Silent clipboard failure | `copyText`'s `execCommand` fallback swallows its exception and shows no toast | Toast a failure message in the `catch` |
 | Unguarded `localStorage` writes | None of the three writes is wrapped in `try/catch` | Wrap all three; degrade to non-persistent behaviour instead of throwing. The cost of this grows with every tool that autosaves |
@@ -1626,9 +1634,11 @@ into the relevant section and mark it answered here rather than deleting it.
 3. **"No gradients on content":** is the design rule "no gradients at all", making the
    logo and hero heading violations, or "no gradients inside a tool's working area",
    making them fine? The wording needs tightening either way.
-4. **Mobile navigation:** below 760px all four topbar links are hidden and tool page
-   footers link only Home, so Projects and Support are unreachable from a tool page on a
-   phone. Is that intended?
+4. **Mobile navigation:** ~~below 760px all four topbar links are hidden, so Projects
+   and Support are unreachable from a tool page on a phone. Is that intended?~~
+   **Answered 2026-08-31: not intended, and fixed in v1.1.0.** A disclosure menu now
+   appears at the same 760px breakpoint where the links disappear. Folded into
+   `DESIGN.md` as the Mobile navigation component.
 5. **The dead Link Cleaner rules** (`" trk"` and `trkCampaign`): ~~fix them or leave
    them as a record?~~ **Answered 2026-08-31: fixed.** `" trk"` turned out to be a
    duplicate of the already-working `"trk"` entry, so it was deleted rather than
@@ -2070,12 +2080,10 @@ and is open question 8. Until it is resolved, the Metrics section is a statement
 intent.
 
 **What is the roadmap direction?**
-The accessibility pass shipped as v1.0.0, so the direction from here is more tools from
-the Future list, two of which have their own milestones: the Bookmark Manager at v1.1.0
-and the Wash Sale Tracker at v1.2.0. Alongside them sit two platform items, search or
-filter on the landing grid now that the eight-tool trigger has been met, and a real
-mobile navigation, which is the last accessibility gap v1.0.0 did not close.
-Explicitly not on the roadmap: accounts, a backend, monetisation, or a
+The accessibility pass shipped as v1.0.0 and the two platform items, tool search and
+mobile navigation, shipped as v1.1.0. The direction from here is more tools from the
+Future list, two of which have their own milestones: the Wash Sale Tracker at v1.2.0 and
+the Bookmark Manager at v1.3.0. Explicitly not on the roadmap: accounts, a backend, monetisation, or a
 framework rewrite. Each of those is excluded by a tenet rather than by preference.
 
 **How is this project maintained?**
