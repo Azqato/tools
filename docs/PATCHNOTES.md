@@ -5,6 +5,105 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v1.3.0 - 2026-08-31
+
+The **Bookmark Manager**, the sixth hosted tool and the largest thing built for this
+project so far. It is the first tool that reads a file, the first that writes one, and
+the first with a format parser other than the Markdown one.
+
+### Added
+- Added the Bookmark Manager at `bookmark-manager.html`. Import the bookmarks file your
+  browser exports, edit names and addresses in place, add and delete bookmarks and
+  folders, search across the whole collection, and export the same format back
+- Added `js/bookmarks.js`, exporting `window.bookmarks` with `parse`, `serialize`,
+  `count`, `flatten`, `remove`, `merge`, `isSafe`, and `nextId`. Like the other tool
+  modules it never touches the live document
+- Added the `azqato-bm-tree` `localStorage` key, the project's fifth, stored as
+  `{ v: 1, tree: [...] }`. It is the most costly of the five to get wrong: it can hold a
+  user's entire bookmark collection, which may exist nowhere else if they imported it and
+  then cleared their browser
+- Added a native `<dialog>` for the import choice, and an "Edit in place" and a "Dialogs"
+  section to `docs/DESIGN.md` recording when each is appropriate
+- Added two audit checks: every `<dialog>` must have an accessible name, and its
+  `aria-labelledby` must point at an element that exists
+
+### Decisions recorded
+- **Folders are preserved through the round trip.** This was the decision that set the
+  size of the tool. Flattening would have been a fraction of the work and would have
+  reorganised the user's collection for them
+- **Parsing goes through `DOMParser` rather than a hand-written tokeniser.** The Netscape
+  bookmark format is barely valid HTML: `<DT>` is never closed, `<p>` is used as an
+  opening tag with no closing tag, and a folder's `<DL>` sits **inside** the `<DT>` that
+  names it in Chrome's output but **after** it as a sibling in Firefox's. The browser's
+  own error recovery is what defines the real shape of these files, so using it is more
+  robust than reimplementing it. `parseDL` handles both nestings, and there is a test for
+  each
+- **A `javascript:` URL in an imported file is kept as data but never becomes a live
+  href.** Dropping it would make import lossy; honouring it would be an XSS hole in a
+  file the user did not write. Unsafe entries are stored, shown in `--danger`, and lose
+  the open button entirely rather than rendering as a link that does nothing
+- **Favicons are not shown, and that is settled rather than deferred.** It would mean
+  sending every bookmarked domain to Google. That is a worse tenet 1 violation than the
+  Favicon Downloader's, where the user types the one domain they are asking about; here
+  it would be their whole collection, sent without them asking for anything
+- **Merge matches on URL within a folder, not globally.** The same link filed in two
+  folders is two bookmarks to a user, and collapsing them would silently reorganise their
+  collection. Folders merge by name
+- **A collapsed folder does not render its children at all.** Edit in place means one
+  real `<input>` per visible row, so not rendering collapsed subtrees is what bounds the
+  DOM on a large collection
+
+### Changed
+- Changed the landing grid from nine cards to ten, and the README from five hosted tools
+  to six
+- Changed the Bookmark Manager milestone in `docs/PRD.md` from four open design questions
+  to four answered ones. Two are answered "no" with reasons rather than being quietly
+  dropped: favicons will not be added, and the storage ceiling is not solved
+- Changed the public surface list from four `localStorage` keys to five
+
+### Fixed
+- Fixed the import file input, which was `.sr-only` and therefore still in the
+  accessibility tree, so a screen reader user met an unlabelled file control sitting next
+  to the button that already triggers it. It is now `hidden`, which removes it from the
+  tree entirely, leaving exactly one control. **Found by the audit harness, not by
+  reading.** `.sr-only` hides from the screen and `hidden` hides from everything; using
+  the first where the second was meant is an easy and invisible mistake
+- Fixed pluralisation across the Bookmark Manager, which produced "1 bookmarks in 0
+  folders" in the import dialog. A single `plural()` helper now covers the dialog, the
+  stats line, the folder counts, the search results, and the import toast
+
+### Removed
+- Nothing
+
+### Verification
+- 57 assertions against `js/bookmarks.js`. Both real-world nestings, Chrome's `<DL>`
+  inside the `<DT>` and Firefox's as a sibling. Entity decoding in names and URLs, nested
+  folders at depth two, counting, flattening with folder paths, a full serialize and
+  reparse round trip preserving structure and escaping, the protocol whitelist against
+  nine cases including `JaVaScRiPt:` and a leading-space `javascript:`, an XSS payload
+  surviving as inert data, removal of a link and of a whole folder, merge folding folders
+  by name and skipping duplicate URLs, and four malformed or empty inputs
+- 35 assertions against the page through its real DOM in an iframe: empty state, tree
+  render, folder expansion and its `aria-expanded`, edit in place writing through to
+  storage, an unsafe URL losing its open affordance and regaining it, search by name and
+  by address with the folder path shown, add, delete, the import dialog, merge skipping
+  duplicates, replace wiping, export round trip, and corrupt storage recovery
+- 15 assertions against the real import path, driving an actual `File` through the file
+  input and `FileReader` rather than calling the handler directly: import into an empty
+  collection skipping the dialog, a second import raising it, cancel leaving the tree
+  untouched, merge, replace, and a file with no bookmarks in it being rejected without
+  touching the collection
+- **One test bug worth recording.** The import suite first appeared to fail, reporting
+  that a second import did not raise the dialog. It did. `--virtual-time-budget`
+  fast-forwards `setTimeout` but does not wait on real file I/O, so a 250ms sleep elapsed
+  instantly while `FileReader` had not finished. The suite now polls for the condition
+  instead of sleeping. **Any future harness touching `FileReader`, `fetch`, or anything
+  else genuinely asynchronous must poll rather than sleep**
+- The structural accessibility audit passes clean on all seven pages
+- No em dashes in any new or modified file. All three harnesses deleted before committing
+
+---
+
 ## v1.2.0 - 2026-08-31
 
 The **Wash Sale Tracker**, the fifth hosted tool and the first in the finance domain,

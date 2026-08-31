@@ -164,6 +164,7 @@ scope by definition.
 | Protein Tracker external card | v0.1.7 | `index.html` |
 | Character Counter: live character, word, sentence, paragraph and line counts, reading and speaking time estimates, six platform limit bars, draft autosave, copy stats | v0.2.0 | `character-counter.html`, `js/charactercounter.js` |
 | Wash Sale Tracker: ticker and trade date entry, 30 day window counted forward, active and expired tables, days-remaining urgency pill, per-row remove, clear expired behind a confirm, versioned collection storage | v1.2.0 | `wash-sale-tracker.html`, `js/washsale.js` |
+| Bookmark Manager: Netscape format import and export with folders preserved, edit in place, add bookmark and folder, delete, search across all folders, merge or replace on import, protocol whitelist on stored URLs | v1.3.0 | `bookmark-manager.html`, `js/bookmarks.js` |
 
 ### Future, post-launch, unordered
 
@@ -177,13 +178,6 @@ Tool candidates, all of which must be buildable with zero dependencies:
 - **Diff tool**: paste two text blocks, see a line-by-line diff
 - **QR code generator**: URL or text to QR, download as PNG or SVG
 - **Timestamp converter**: Unix epoch to human-readable, any timezone
-- **Bookmark manager**: an editor for a bookmark collection that is advanced in what it
-  lets you do but simple to use. It imports the HTML bookmarks file that Chrome exports
-  (the Netscape bookmark format, which Firefox, Safari, and Edge all read and write
-  too), lets the user edit each bookmark's URL and display name, and exports the same
-  format back so the result can be imported into Chrome again. The collection is held in
-  browser storage on the user's own device, so the tool never sees a server. Scope,
-  constraints, and the open questions on it are set out in the milestone breakdown below
 
 Platform work:
 
@@ -340,7 +334,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 | v1.0.0 - Accessibility pass and first stable release | 2026-08-31 | Complete |
 | v1.1.0 - Platform: mobile navigation and tool search | 2026-08-31 | Complete |
 | v1.2.0 - Wash Sale Tracker | 2026-08-31 | Complete |
-| v1.3.0 - Bookmark Manager | TBD | Planned |
+| v1.3.0 - Bookmark Manager | 2026-08-31 | Complete |
 
 > **Resolved in v1.0.0.** This table used to carry a row reading "v1.0.0 - Public
 > deployment to GitHub Pages, Complete" while the changelog was still at v0.1.x, so the
@@ -367,7 +361,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 - One or two further tools from the Future list, exact tools not yet chosen
 - Landing page copy revisit once the grid exceeds eight cards
 
-### v1.3.0 planned: Bookmark Manager
+### v1.3.0 Bookmark Manager, complete 2026-08-31
 
 A larger tool than anything shipped so far, and the first one that owns a user's data
 rather than transforming a single input, so it is given its own milestone rather than
@@ -390,24 +384,29 @@ being folded into a tool batch.
   the whole collection, edit in place without a modal, multi-select delete) rather than
   from a dense interface. The default view should be a plain list a person can scan
 
-**Open design questions to resolve before building, not now:**
+**Design questions, all answered before building:**
 
-- Folder structure. Chrome's export is a tree, and preserving folders on a round trip is
-  most of the parsing difficulty. Flattening the tree is far simpler and loses the user's
-  organisation. This decision sets the size of the whole tool
-- Storage limit. `localStorage` gives roughly 5MB per origin. A large bookmark
-  collection with favicons could approach that, and the project currently has no guard on
-  any storage write. IndexedDB has no practical limit but is a new API surface for this
-  codebase. Measure a real export before choosing
-- Whether to show favicons. It would make the list far easier to scan, and the Favicon
-  Downloader already has the fetching code, but it would mean sending every bookmarked
-  domain to Google. That is a direct tension with tenet 1 and must be opt-in and off by
-  default if it happens at all
-- Whether import replaces or merges with an existing collection. Replacing silently
-  destroys work; merging needs a duplicate rule
+- **Folder structure.** ~~Preserve the tree or flatten it?~~ **Preserved.** Import,
+  display, edit and export all keep the nesting, so a round trip does not reorganise the
+  user's collection. This was the decision that set the size of the tool, and it was
+  taken deliberately rather than by default
+- **Storage limit.** **Not solved, and honestly bounded.** The collection is JSON in
+  `localStorage`, so it inherits the roughly 5MB per origin limit. The write is wrapped
+  and a failure raises a toast naming the likely cause rather than losing the edit in
+  silence. IndexedDB remains the answer for a genuinely large collection and remains
+  unbuilt. Recorded as technical debt rather than claimed as handled
+- **Favicons.** **Not shown, and this is settled rather than deferred.** Showing them
+  means sending every bookmarked domain to Google, which is a direct tenet 1 violation
+  and a far worse one than the Favicon Downloader's: there the user types the single
+  domain they are asking about, here it would be their whole collection, sent without
+  them asking for anything
+- **Import replaces or merges.** **The user is asked, every time.** A native `<dialog>`
+  names both collection sizes and states what each choice does. Merge matches on URL and
+  skips duplicates; folders merge by name. Cancel is a third option and leaves everything
+  untouched
 
-**Constraints it must respect:** no dependencies, so the Netscape format parser is
-hand-written like the Markdown parser; no server, so import and export are both local
+**Constraints, all honoured:** no dependencies; no server, so import and export are both
+local
 file operations through `FileReader` and a Blob download; and the collection is the
 user's data, so the storage key goes on the public surface list and can never be renamed
 without a migration read.
@@ -1128,6 +1127,7 @@ outbound links; no data is passed to them and no code is loaded from them.
 | Markdown code-span sentinel | `js/markdown.js` uses a literal NUL character (`"\0"`, embedded as a raw byte in the source) as the placeholder that protects inline code from the inline formatting rules | Use a long random string that cannot appear in user text. The NUL byte makes the file report as binary to some tools, which is why `grep` treats `markdown.js` as a binary file |
 | Image `src` not protocol-checked | Markdown links are whitelisted to safe protocols; image sources are only attribute-escaped | Apply the same whitelist to `src` |
 | Page chrome now spans two files | The topbar markup is copy-pasted into five HTML files and its behaviour lives in `common.js`. v1.1.0 widened that markup with a button and a `<nav>`, so a navigation change is now five HTML edits plus one JavaScript edit that must stay in step | Unchanged by the tenets: a build step would fix it and break tenet 3. The mitigation is that all behaviour went into `common.js` rather than into five inline scripts, so only the markup is duplicated |
+| Collection storage has a ceiling | The Bookmark Manager stores the whole tree as JSON in `localStorage`, which gives roughly 5MB per origin. A large collection can hit it. The write is wrapped and toasts on failure, so an edit is never lost silently, but the ceiling is real | IndexedDB, which has no practical limit. It is a new API surface for this codebase and was not worth adding before anyone has hit the limit |
 | Theme flash | `common.js` loads at the end of `<body>` while `<html>` hardcodes `data-theme="light"` | Move the localStorage read to an inline `<script>` in `<head>` |
 | Silent clipboard failure | `copyText`'s `execCommand` fallback swallows its exception and shows no toast | Toast a failure message in the `catch` |
 | Unguarded `localStorage` writes | None of the three writes is wrapped in `try/catch` | Wrap all three; degrade to non-persistent behaviour instead of throwing. The cost of this grows with every tool that autosaves |
@@ -1468,12 +1468,13 @@ project that is:
   `window.copyText`, `window.mdToHtml`, `window.cleanUrl`, `window.countText`, and
   `window.formatDuration`, because a page in this repository imports them by name across
   a file boundary
-- The four `localStorage` keys, `azqato-theme`, `azqato-md-draft`, `azqato-cc-draft`,
-  and `azqato-ws-records`, because a returning visitor's browser holds data under those
-  exact names. `azqato-ws-records` is the first that holds a collection rather than a
-  single value and the first that carries a schema version, so changing its record shape
-  means bumping `v` and reading the old shape before writing the new one, not just
-  renaming a key
+- The five `localStorage` keys, `azqato-theme`, `azqato-md-draft`, `azqato-cc-draft`,
+  `azqato-ws-records`, and `azqato-bm-tree`, because a returning visitor's browser holds
+  data under those exact names. The last two hold collections rather than single values
+  and carry schema versions, so changing a record shape means bumping `v` and reading the
+  old shape before writing the new one, not just renaming a key. `azqato-bm-tree` is the
+  most costly of the five to get wrong: it can hold a user's entire bookmark collection,
+  which may exist nowhere else if they imported it and then cleared their browser
 
 **Internal** means everything else: `README.md`, everything in `/docs`, individual CSS
 class names, DOM ids, and any function private to an IIFE or an inline script.

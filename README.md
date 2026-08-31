@@ -10,7 +10,7 @@ nothing to install or sign up for.
 
 ## What the site offers
 
-The site is a single landing page listing every tool, plus one page per tool. Five
+The site is a single landing page listing every tool, plus one page per tool. Six
 tools are built and hosted here. Four more are Azqato projects that live on their own
 sites and are linked from the same list, marked "external". A search box above the list
 filters it as you type.
@@ -53,6 +53,14 @@ until you clear them. It is a record keeping aid rather than tax advice: it trac
 dates you type in, and does not know what you traded or whether a sale was at a loss.
 Everything is stored in your own browser.
 
+**Bookmark Manager**
+Import the bookmarks file your browser exports, tidy the collection up, and export it
+back in the same format. Folders are kept intact through the round trip, names and
+addresses are edited in place with no separate edit mode, and a search box looks across
+every folder at once. If you already have a collection loaded, importing asks whether to
+merge the two or replace what is there rather than deciding for you. The file never
+leaves your browser.
+
 ### Linked from here, hosted elsewhere
 
 **Nasdaq 100 Screener** - grades every company in the Nasdaq 100 against the Azqato
@@ -86,7 +94,7 @@ exception: it needs a connection, because it asks a public icon service for the 
 
 ## Current status
 
-Live, stable, and actively developed. Five in-browser tools are finished and working,
+Live, stable, and actively developed. Six in-browser tools are finished and working,
 and new ones are added when they can meet the same standard: useful, fast, and doing all
 their work on your device rather than someone's server. The site has had a full
 accessibility pass, so every page can be navigated by keyboard alone, works with a screen

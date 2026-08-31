@@ -784,6 +784,142 @@ input[type="date"].field { min-width: 0; }
   .ws-table .hide-xs { display: none; }
 }
 
+/* ---- Bookmark Manager ----------------------------------------------------- */
+.bm-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.bm-bar .spacer { flex: 1; }
+.bm-search { position: relative; flex: 1 1 240px; max-width: 340px; }
+.bm-search .field { padding-left: 38px; }
+.bm-search svg {
+  position: absolute;
+  left: 12px; top: 50%;
+  width: 16px; height: 16px;
+  margin-top: -8px;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.bm-stats {
+  margin: 0 0 18px;
+  font-size: .86rem;
+  color: var(--text-faint);
+}
+
+.bm-tree { margin-bottom: 30px; }
+.bm-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+}
+.bm-row:hover { background: var(--bg-inset); }
+.bm-row .grip { flex: 1; display: flex; gap: 8px; align-items: center; min-width: 0; }
+
+.bm-fold {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  color: var(--text);
+  text-align: left;
+  padding: 0;
+  min-width: 0;
+}
+.bm-fold .caret { transition: .15s ease; color: var(--text-faint); flex: none; }
+.bm-fold[aria-expanded="true"] .caret { transform: rotate(90deg); }
+.bm-fold svg { width: 15px; height: 15px; }
+.bm-fold .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-fold .c { font-weight: 500; font-size: .82rem; color: var(--text-faint); flex: none; }
+
+.bm-kids {
+  margin-left: 11px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+
+/* Editing happens in place, so the fields are invisible until touched. They
+   are real inputs at all times, which is what makes edit-in-place possible
+   without a modal or an edit mode. */
+.bm-inp {
+  font-family: inherit;
+  font-size: .9rem;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 4px 7px;
+  min-width: 0;
+  transition: .15s ease;
+}
+.bm-inp:hover { border-color: var(--border); }
+.bm-inp:focus {
+  outline: none;
+  background: var(--bg-elev);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.bm-inp.name { flex: 0 1 240px; font-weight: 600; }
+.bm-inp.url { flex: 1 1 260px; color: var(--text-faint); font-size: .85rem; }
+.bm-inp.unsafe { color: var(--danger); }
+
+.bm-open, .bm-del {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  padding: 5px;
+  border-radius: 6px;
+  line-height: 0;
+  flex: none;
+  transition: .15s ease;
+}
+.bm-open:hover { color: var(--accent); background: var(--bg-elev); }
+.bm-del:hover { color: var(--danger); background: var(--bg-elev); }
+.bm-open svg, .bm-del svg { width: 15px; height: 15px; }
+
+.bm-empty {
+  padding: 44px 20px;
+  text-align: center;
+  color: var(--text-faint);
+}
+.bm-hit-path {
+  font-size: .78rem;
+  color: var(--text-faint);
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Native dialog. No library, and it brings its own focus trap and Escape
+   handling, which a hand-rolled panel would have to reimplement badly. */
+.bm-dialog {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+  color: var(--text);
+  padding: 26px;
+  max-width: 440px;
+  box-shadow: var(--shadow);
+}
+.bm-dialog::backdrop { background: rgba(10, 13, 18, .45); }
+.bm-dialog h2 { margin: 0 0 10px; font-size: 1.1rem; }
+.bm-dialog p { margin: 0 0 18px; color: var(--text-soft); font-size: .92rem; }
+.bm-dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+@media (max-width: 620px) {
+  .bm-row { flex-wrap: wrap; }
+  .bm-inp.name, .bm-inp.url { flex: 1 1 100%; }
+}
+
 /* ---- Mobile navigation ----------------------------------------------------
    The topbar links carry .hide-sm and vanish below 760px, which left tool
    pages with no way to reach Projects or Support on a phone. This is the

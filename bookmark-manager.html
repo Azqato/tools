@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookmark Manager - Azqato's Tools</title>
+  <meta name="description" content="Import your browser bookmarks, rename and tidy them, and export them back. Folders are preserved. Runs entirely in your browser." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
+      <div class="spacer"></div>
+      <a class="nav-link hide-sm" href="https://azqato.com/">Azqato</a>
+      <a class="nav-link hide-sm" href="https://azqato.com/projects">Projects</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/tools/">Tools</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/support.html">Support</a>
+      <button class="icon-btn nav-toggle" id="nav-toggle" aria-label="Menu"
+              aria-expanded="false" aria-controls="nav-menu">
+        <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+    <nav class="nav-menu" id="nav-menu" aria-label="Site" hidden>
+      <a href="https://azqato.com/">Azqato</a>
+      <a href="https://azqato.com/projects">Projects</a>
+      <a href="https://azqato.github.io/tools/">Tools</a>
+      <a href="https://azqato.github.io/support.html">Support</a>
+    </nav>
+  </header>
+
+  <main id="main" class="page wrap">
+    <div class="page-head">
+      <div class="crumb"><a href="index.html">Tools</a> / Bookmark Manager</div>
+      <h1>Bookmark Manager</h1>
+      <p>Import the bookmarks file your browser exports, rename and tidy them, then export
+        it back. Folders are kept intact. Nothing is uploaded.</p>
+    </div>
+
+    <div class="bm-bar">
+      <button class="btn primary" id="bm-import">Import bookmarks</button>
+      <!-- hidden, not .sr-only: .sr-only keeps an element in the accessibility
+           tree, which left screen reader users meeting an unlabelled file input
+           next to the button that already triggers it. The button is the control;
+           this is the mechanism. Programmatic .click() still opens the picker. -->
+      <input type="file" id="bm-file" accept=".html,.htm,text/html" hidden />
+      <button class="btn" id="bm-export">Export</button>
+      <button class="btn ghost" id="bm-add">Add bookmark</button>
+      <button class="btn ghost" id="bm-addfolder">Add folder</button>
+      <div class="spacer"></div>
+      <div class="bm-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <label class="sr-only" for="bm-filter">Search bookmarks</label>
+        <input id="bm-filter" class="field" type="search" autocomplete="off"
+               placeholder="Search name or address" />
+      </div>
+    </div>
+    <p class="bm-stats" id="bm-stats" role="status"></p>
+
+    <div class="bm-tree" id="bm-tree"></div>
+
+    <p class="ws-legal">Your collection is stored in this browser only. Clearing your
+      browser data removes it, and it does not follow you to another device, so export a
+      copy if it matters. Export produces the same format your browser imports, so the
+      file works in Chrome, Firefox, Safari and Edge alike.</p>
+  </main>
+
+  <dialog class="bm-dialog" id="bm-choice" aria-labelledby="bm-choice-title">
+    <h2 id="bm-choice-title">You already have bookmarks here</h2>
+    <p id="bm-choice-body"></p>
+    <div class="row">
+      <button class="btn primary" id="bm-merge">Merge them</button>
+      <button class="btn" id="bm-replace">Replace everything</button>
+      <button class="btn ghost" id="bm-cancel">Cancel</button>
+    </div>
+  </dialog>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© <span class="year"></span> Azqato's Tools</span>
+      <div class="spacer"></div>
+      <a href="index.html">Home</a>
+      <span style="color:var(--text-faint)">Your bookmarks never leave your device</span>
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script src="js/bookmarks.js"></script>
+  <script>
+    var treeBox = document.getElementById("bm-tree");
+    var statsEl = document.getElementById("bm-stats");
+    var filterEl = document.getElementById("bm-filter");
+    var fileEl = document.getElementById("bm-file");
+    var dialog = document.getElementById("bm-choice");
+
+    var STORE = "azqato-bm-tree";
+    var SCHEMA = 1;
+
+    var tree = load();
+    var open = {};        // folder id -> expanded. Not persisted: a view state,
+                          // not the user's data, and it resets harmlessly.
+    var pendingImport = null;
+
+    function load() {
+      var raw;
+      try { raw = localStorage.getItem(STORE); } catch (e) { return []; }
+      if (!raw) return [];
+      try {
+        var parsed = JSON.parse(raw);
+        if (!parsed || parsed.v !== SCHEMA || !parsed.tree) return [];
+        return parsed.tree;
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function save() {
+      try {
+        localStorage.setItem(STORE, JSON.stringify({ v: SCHEMA, tree: tree }));
+      } catch (e) {
+        // A large collection can exceed the roughly 5MB localStorage gives an
+        // origin. Say so plainly rather than losing the edit in silence.
+        toast("Couldn't save. The collection may be too large for browser storage");
+      }
+    }
+
+    function plural(n, word) {
+      return n + " " + word + (n === 1 ? "" : "s");
+    }
+
+    function icon(paths, cls) {
+      return "<svg class='" + (cls || "") + "' viewBox='0 0 24 24' fill='none' " +
+        "stroke='currentColor' stroke-width='2' stroke-linecap='round' " +
+        "stroke-linejoin='round'>" + paths + "</svg>";
+    }
+
+    function linkRow(item) {
+      var row = document.createElement("div");
+      row.className = "bm-row";
+
+      var name = document.createElement("input");
+      name.className = "bm-inp name";
+      name.value = item.name;
+      name.setAttribute("aria-label", "Name");
+      name.oninput = function () { item.name = name.value; save(); };
+
+      var url = document.createElement("input");
+      url.className = "bm-inp url" + (bookmarks.isSafe(item.url) ? "" : " unsafe");
+      url.value = item.url;
+      url.setAttribute("aria-label", "Address");
+      url.oninput = function () {
+        item.url = url.value;
+        url.className = "bm-inp url" + (bookmarks.isSafe(item.url) ? "" : " unsafe");
+        save();
+        refreshOpenLink(openBtn, item);
+      };
+
+      var openBtn = document.createElement("a");
+      openBtn.className = "bm-open";
+      openBtn.target = "_blank";
+      openBtn.rel = "noopener noreferrer";
+      openBtn.innerHTML = icon("<path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/><path d='M15 3h6v6M10 14 21 3'/>");
+      refreshOpenLink(openBtn, item);
+
+      var del = document.createElement("button");
+      del.className = "bm-del";
+      del.type = "button";
+      del.setAttribute("aria-label", "Delete bookmark " + (item.name || item.url));
+      del.innerHTML = icon("<path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/>");
+      del.onclick = function () {
+        bookmarks.remove(tree, item.id);
+        save(); render(); toast("Deleted");
+      };
+
+      row.appendChild(name);
+      row.appendChild(url);
+      row.appendChild(openBtn);
+      row.appendChild(del);
+      return row;
+    }
+
+    /* An imported file can carry a `javascript:` URL. It is kept as data so an
+       import round trip is lossless, but it must never become a live href.
+       Unsafe entries lose the open affordance entirely rather than being
+       rendered as a link that does nothing. */
+    function refreshOpenLink(a, item) {
+      if (bookmarks.isSafe(item.url)) {
+        a.href = item.url;
+        a.hidden = false;
+        a.setAttribute("aria-label", "Open " + (item.name || item.url) + " in a new tab");
+      } else {
+        a.removeAttribute("href");
+        a.hidden = true;
+      }
+    }
+
+    function folderRow(item, depth) {
+      var wrap = document.createElement("div");
+      var row = document.createElement("div");
+      row.className = "bm-row";
+
+      var btn = document.createElement("button");
+      btn.className = "bm-fold";
+      btn.type = "button";
+      var isOpen = !!open[item.id];
+      btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      var c = bookmarks.count(item.children);
+      btn.innerHTML =
+        icon("<path d='m9 6 6 6-6 6'/>", "caret") +
+        icon("<path d='M3 7a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.7.9L12 8h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/>") +
+        "<span class='n'></span><span class='c'></span>";
+      btn.querySelector(".n").textContent = item.name;
+      btn.querySelector(".c").textContent = plural(c.links, "item");
+
+      var del = document.createElement("button");
+      del.className = "bm-del";
+      del.type = "button";
+      del.setAttribute("aria-label", "Delete folder " + item.name + " and its contents");
+      del.innerHTML = icon("<path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/>");
+      del.onclick = function () {
+        if (!confirm("Delete the folder “" + item.name + "” and everything " +
+                     "in it? This cannot be undone.")) return;
+        bookmarks.remove(tree, item.id);
+        save(); render(); toast("Folder deleted");
+      };
+
+      var kids = document.createElement("div");
+      kids.className = "bm-kids";
+      kids.hidden = !isOpen;
+
+      btn.onclick = function () {
+        open[item.id] = !open[item.id];
+        render();
+      };
+
+      // Renaming a folder is a double click on its name, so a single click
+      // stays reserved for the thing people do far more often, opening it.
+      btn.ondblclick = function (e) {
+        e.stopPropagation();
+        var current = item.name;
+        var next = prompt("Rename folder", current);
+        if (next === null) return;
+        next = next.trim();
+        if (!next || next === current) return;
+        item.name = next;
+        save(); render();
+      };
+
+      row.appendChild(btn);
+      row.appendChild(del);
+      wrap.appendChild(row);
+
+      if (isOpen) {
+        renderInto(kids, item.children, depth + 1);
+        wrap.appendChild(kids);
+      }
+      return wrap;
+    }
+
+    function renderInto(box, items, depth) {
+      items.forEach(function (it) {
+        box.appendChild(it.type === "folder" ? folderRow(it, depth) : linkRow(it));
+      });
+    }
+
+    function renderSearch(q) {
+      // `flatten` returns copies carrying the folder path, but editing has to
+      // write through to the real tree nodes. One index built here, rather than
+      // a fresh walk per hit, keeps search linear instead of quadratic.
+      var byId = {};
+      (function walk(list) {
+        list.forEach(function (it) {
+          if (it.type === "folder") walk(it.children); else byId[it.id] = it;
+        });
+      })(tree);
+
+      var hits = bookmarks.flatten(tree).filter(function (l) {
+        return (l.name + " " + l.url).toLowerCase().indexOf(q) !== -1;
+      });
+
+      statsEl.textContent = plural(hits.length, "bookmark") +
+        (hits.length === 1 ? " matches" : " match");
+      if (!hits.length) {
+        treeBox.innerHTML = "<p class='bm-empty'>Nothing matches that.</p>";
+        return;
+      }
+
+      hits.forEach(function (hit) {
+        var real = byId[hit.id];
+        if (!real) return;
+        var row = linkRow(real);
+        if (hit.path) {
+          var tag = document.createElement("span");
+          tag.className = "bm-hit-path";
+          tag.textContent = hit.path;
+          row.insertBefore(tag, row.querySelector(".bm-open"));
+        }
+        treeBox.appendChild(row);
+      });
+    }
+
+    function render() {
+      treeBox.innerHTML = "";
+      var q = filterEl.value.trim().toLowerCase();
+
+      if (q) { renderSearch(q); return; }
+
+      var c = bookmarks.count(tree);
+      statsEl.textContent = c.links === 0 && c.folders === 0
+        ? ""
+        : plural(c.links, "bookmark") + " in " + plural(c.folders, "folder");
+
+      if (!tree.length) {
+        treeBox.innerHTML = "<p class='bm-empty'>Nothing here yet. Import the bookmarks " +
+          "file your browser exports, or add one by hand.</p>";
+        return;
+      }
+      renderInto(treeBox, tree, 0);
+    }
+
+    // --- Import ------------------------------------------------------------
+    document.getElementById("bm-import").onclick = function () { fileEl.click(); };
+
+    fileEl.onchange = function () {
+      var file = fileEl.files && fileEl.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var incoming = bookmarks.parse(reader.result);
+        var c = bookmarks.count(incoming);
+        if (!c.links && !c.folders) {
+          toast("No bookmarks found in that file");
+          fileEl.value = "";
+          return;
+        }
+        if (!tree.length) { applyImport(incoming, "replace"); return; }
+        pendingImport = incoming;
+        var have = bookmarks.count(tree);
+        document.getElementById("bm-choice-body").textContent =
+          "This file has " + plural(c.links, "bookmark") + " in " +
+          plural(c.folders, "folder") + ". You already have " +
+          plural(have.links, "bookmark") + " in " + plural(have.folders, "folder") +
+          ". Merging keeps both and skips addresses you already have. Replacing " +
+          "discards what is here now.";
+        dialog.showModal();
+      };
+      reader.onerror = function () { toast("Couldn't read that file"); };
+      reader.readAsText(file);
+    };
+
+    function applyImport(incoming, mode) {
+      if (mode === "merge") bookmarks.merge(tree, incoming);
+      else tree = incoming;
+      // Top-level folders start open, so an import shows something immediately
+      // rather than a list of closed folders.
+      tree.forEach(function (it) { if (it.type === "folder") open[it.id] = true; });
+      save();
+      filterEl.value = "";
+      render();
+      var c = bookmarks.count(tree);
+      toast((mode === "merge" ? "Merged, now " : "Imported ") +
+            plural(c.links, "bookmark"));
+      fileEl.value = "";
+      pendingImport = null;
+    }
+
+    document.getElementById("bm-merge").onclick = function () {
+      dialog.close(); applyImport(pendingImport, "merge");
+    };
+    document.getElementById("bm-replace").onclick = function () {
+      dialog.close(); applyImport(pendingImport, "replace");
+    };
+    document.getElementById("bm-cancel").onclick = function () {
+      dialog.close(); pendingImport = null; fileEl.value = "";
+    };
+
+    // --- Export ------------------------------------------------------------
+    document.getElementById("bm-export").onclick = function () {
+      if (!tree.length) { toast("Nothing to export yet"); return; }
+      var blob = new Blob([bookmarks.serialize(tree)], { type: "text/html" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "bookmarks.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      toast("Exported bookmarks.html");
+    };
+
+    // --- Add ---------------------------------------------------------------
+    document.getElementById("bm-add").onclick = function () {
+      tree.push({ id: bookmarks.nextId(), type: "link", name: "New bookmark", url: "https://" });
+      save();
+      filterEl.value = "";
+      render();
+      var inputs = treeBox.querySelectorAll(".bm-inp.name");
+      if (inputs.length) {
+        var last = inputs[inputs.length - 1];
+        last.focus();
+        last.select();
+      }
+    };
+
+    document.getElementById("bm-addfolder").onclick = function () {
+      var name = prompt("Folder name", "New folder");
+      if (name === null) return;
+      name = name.trim();
+      if (!name) return;
+      var folder = { id: bookmarks.nextId(), type: "folder", name: name, children: [] };
+      tree.push(folder);
+      open[folder.id] = true;
+      save();
+      filterEl.value = "";
+      render();
+    };
+
+    filterEl.addEventListener("input", render);
+
+    render();
+
+    document.querySelectorAll(".year").forEach(function (el) {
+      el.textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>

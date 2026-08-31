@@ -1,6 +1,6 @@
 # Design System - Azqato's Tools
 
-**Last verified against the code:** 2026-08-31 for v1.2.0 (`css/style.css`, 888 lines, ~23.1KB)
+**Last verified against the code:** 2026-08-31 for v1.3.0 (`css/style.css`, 1024 lines, ~26.4KB)
 
 Every value in this document was read out of `css/style.css` or the five HTML pages
 rather than inferred. Where the code and an earlier version of this document
@@ -511,6 +511,31 @@ never becomes visible and so uses clipping instead. Do not merge the two.
 
 Every page's `<main>` carries `id="main"` to receive it. A new page needs both halves:
 the anchor after `<body>` and the id on `<main>`. Neither works alone.
+
+### Edit in place
+
+`.bm-inp` is the Bookmark Manager's editing pattern and the project's answer to "advanced
+but simple". The fields are real `<input>` elements at all times, styled with a
+transparent border so they read as plain text until hovered or focused. There is no edit
+mode, no pencil button and no modal: the thing you see is the thing you type into.
+
+The cost is one input element per visible row, so **a collapsed folder does not render
+its children at all.** That is what bounds the DOM on a large collection, and it is why
+expanding a folder re-renders rather than toggling visibility. Any future list adopting
+this pattern needs the same bound, or it will build thousands of inputs nobody is
+looking at.
+
+### Dialogs
+
+`.bm-dialog` uses the native `<dialog>` element with `showModal()`. It was chosen over a
+hand-rolled panel because it brings a focus trap, Escape handling, an inert background
+and `::backdrop` for free, all of which a custom panel would have to reimplement and
+would reimplement worse. It needs an `aria-labelledby` pointing at its own heading, which
+the audit harness now checks on every dialog.
+
+**Reserve it for a genuine fork where the user must choose and no default is safe.** The
+only instance is import: merge or replace, where guessing either way can destroy work. A
+confirmation with one obvious answer stays a `confirm()`, as the folder delete does.
 
 ### Data tables
 
