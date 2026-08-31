@@ -5,6 +5,116 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v0.2.0 - 2026-08-31
+
+First tool of the v0.2.0 batch. Minor version bump rather than a patch, per the rule in
+`PRD.md`: a new tool or a visible feature moves the minor number.
+
+### Added
+- Added the **Character Counter** tool at `character-counter.html`, the fourth hosted
+  tool. Live counts for characters with spaces, characters without spaces, words,
+  sentences, paragraphs, and lines, updating on every keystroke
+- Added reading and speaking time estimates to the Character Counter, at 238 and 130
+  words per minute respectively. 238 is the pooled mean for adult silent reading of
+  English prose from Brysbaert's 2019 meta-analysis; 130 is a typical prepared-talk pace
+- Added six platform limit bars to the Character Counter: X post (280), single SMS (160),
+  meta description (160), title tag (60), Instagram caption (2200), and LinkedIn post
+  (3000). Each shows characters remaining or the overage, with the bar and the count
+  turning `--danger` once the limit is passed
+- Added an astral-character note to the Character Counter. When the text contains
+  characters that occupy two UTF-16 units, such as emoji, the page states both the
+  reader-facing code point count and the platform-facing unit count instead of silently
+  picking one
+- Added Paste from clipboard, Try an example, Clear, and Copy stats actions to the
+  Character Counter
+- Added draft autosave to the Character Counter under the `localStorage` key
+  `azqato-cc-draft`, matching the Markdown Editor's behaviour. This is the third
+  `localStorage` key in the project and is now on the public surface list in `PRD.md`,
+  so it can never be renamed without a migration read
+- Added `js/charactercounter.js`, exporting `window.countText` and
+  `window.formatDuration`. Like `markdown.js` and `linkcleaner.js` it is a single IIFE
+  that never touches the DOM, so both functions are pure functions over their arguments
+- Added a Character Counter card to the landing page grid, placed after Link Cleaner and
+  before the external tools
+- Added a Character Counter section to `css/style.css`, before the final 760px media
+  query as the organisation rule requires. New classes: `.cc-actions`, `.cc-grid`,
+  `.cc-stat` (with a `.time` variant), `.cc-note`, `.cc-limits`, `.cc-limit` (with an
+  `.over` state), `.cc-limit-head`, `.cc-bar`, `.cc-fill`
+- Added a "Stat grid and limit bars" component pattern to `docs/DESIGN.md`, documenting
+  both new patterns, the `auto-fit` versus `auto-fill` distinction against the existing
+  grids, and the rule that a second progress bar should reuse `.cc-bar` and `.cc-fill`
+  rather than inventing a variant
+- Added a "Bookmark Manager" entry to the Future tool list in `docs/PRD.md` and a
+  dedicated v0.3.0 roadmap milestone for it, covering scope (import and export the
+  Netscape bookmark format Chrome reads and writes, edit URL and display name, add and
+  delete, store the collection in the browser), four open design questions to resolve
+  before building (folder tree preservation, storage limit and whether `localStorage` is
+  large enough, whether favicons are worth the privacy cost, and whether import replaces
+  or merges), and the constraints it must respect
+- Added a "note on testing" subsection to the Working Practice section of `docs/PRD.md`,
+  recording the throwaway-harness technique used to verify the new module by assertion
+  under headless Edge, and the rule that the harness is deleted rather than committed
+- Added Character Counter steps to the manual verification checklist in `docs/PRD.md`,
+  with the exact figures the sample text should produce
+- Added two Character Counter rows to the Common Errors table and five Character Counter
+  questions to the external FAQ in `docs/PRD.md`, covering what it counts, why its
+  character count can differ from another tool's, that the sentence count is an estimate
+  and why, where the reading and speaking constants come from, and that the draft is
+  stored unencrypted on the user's own device
+
+### Changed
+- Renumbered the accessibility pass milestone from v0.3.0 to v0.4.0 in `docs/PRD.md`, to
+  make room for the Bookmark Manager milestone. The v0.2.0 milestone moved from Planned
+  to In Progress
+- Removed "Word and character counter" from the Future tool list in `docs/PRD.md`, since
+  it has now shipped as the Character Counter
+- Updated `README.md` from three hosted tools to four, and added a plain-language
+  description of the Character Counter
+- Updated every page and tool count across `docs/PRD.md` and `docs/DESIGN.md` from four
+  pages to five and from three hosted tools to four, in the folder tree, the architecture
+  diagram, the public surface list, the performance table, the technical debt table, the
+  conventions table, and the Working Practice lookup table. Historical entries were left
+  alone: the v0.1.3 note about three tool pages moving and the press release's launch-day
+  description both record what was true at the time
+- Updated the measured file sizes in `docs/PRD.md` to 2026-08-31 values, and noted that
+  `css/style.css` is the figure to watch as the grid fills out, since it is shared and
+  grows with every tool
+- Updated the duplicated-page-chrome entries in the technical debt and fragile areas
+  tables of `docs/PRD.md` from four files to five, and recorded that this cost grows by
+  one file with every tool shipped, making it the strongest argument the project has
+  against its own zero-build-step tenet
+- Updated the unguarded `localStorage` write notes in `docs/PRD.md` from two writes to
+  three, and recorded that the reason a failed write does not break the visible output is
+  statement ordering rather than design, so a future tool that writes before rendering
+  would fail visibly
+- Updated the "last verified" line in `docs/DESIGN.md` to note the v0.2.0 update and the
+  new stylesheet size, 645 lines and 16.6KB, up from 565 lines and 14.9KB
+- Updated the tool page footer list in `docs/DESIGN.md` to four variants, adding the
+  Character Counter's data-location line, "Your text never leaves your device"
+
+### Fixed
+- Nothing. No existing behaviour changed in this version
+
+### Removed
+- Nothing from the site. The temporary test harnesses `_test.html` and `_test2.html` were
+  created during development, used to verify the new module and page, and deleted before
+  committing. They were never part of the repository
+
+### Verification
+- 31 assertions against `js/charactercounter.js` run in headless Edge: empty input, basic
+  counts, multi-sentence text, text with no terminator, multi-paragraph text,
+  whitespace-only input, emoji (code units versus code points), `null` input, the 238
+  words per minute boundary, and all four `formatDuration` branches. All passed
+- All five pages rendered in headless Edge with their scripts running to completion,
+  confirmed by the injected copyright year being present on each
+- The Character Counter's sample text was verified end to end by driving the button and
+  reading the rendered DOM: 379 characters, 303 without spaces, 75 words, 6 sentences, 3
+  paragraphs, 8 lines, 19 sec reading, 35 sec speaking, four bars over limit and two
+  under, with over-limit fills clamped to 100% width
+- No em dashes in any of the new or modified files, in any of the three prohibited forms
+
+---
+
 ## v0.1.8 - 2026-08-25
 
 Full documentation audit. The codebase was scanned in its entirety before any document

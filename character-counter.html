@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Character Counter - Azqato's Tools</title>
+  <meta name="description" content="Count characters, words, sentences and paragraphs as you type, and check your text against common platform limits. Runs entirely in your browser." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
+      <div class="spacer"></div>
+      <a class="nav-link hide-sm" href="https://azqato.com/">Azqato</a>
+      <a class="nav-link hide-sm" href="https://azqato.com/projects">Projects</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/tools/">Tools</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/support.html">Support</a>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="page wrap">
+    <div class="page-head">
+      <div class="crumb"><a href="index.html">Tools</a> / Character Counter</div>
+      <h1>Character Counter</h1>
+      <p>Paste or type your text and see the counts update as you go. Nothing is uploaded, it all happens in your browser.</p>
+    </div>
+
+    <label class="lbl" for="cc-input">Your text</label>
+    <textarea id="cc-input" class="field" rows="9" spellcheck="false"
+      placeholder="Start typing or paste your text here…"></textarea>
+
+    <div class="cc-actions">
+      <button class="btn" id="cc-paste">Paste from clipboard</button>
+      <button class="btn ghost" id="cc-sample">Try an example</button>
+      <button class="btn ghost" id="cc-clear">Clear</button>
+      <div class="spacer"></div>
+      <button class="btn sm primary" id="cc-copy">Copy stats</button>
+    </div>
+
+    <p class="section-label">The numbers</p>
+    <div class="cc-grid" id="cc-grid"></div>
+    <p class="cc-note" id="cc-note"></p>
+
+    <p class="section-label">Against common limits</p>
+    <div class="cc-limits" id="cc-limits"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© <span class="year"></span> Azqato's Tools</span>
+      <div class="spacer"></div>
+      <a href="index.html">Home</a>
+      <span style="color:var(--text-faint)">Your text never leaves your device</span>
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script src="js/charactercounter.js"></script>
+  <script>
+    var input = document.getElementById("cc-input");
+    var grid = document.getElementById("cc-grid");
+    var note = document.getElementById("cc-note");
+    var limitBox = document.getElementById("cc-limits");
+    var STORE = "azqato-cc-draft";
+
+    // Character limits measured against `characters` (UTF-16 code units),
+    // which is what each platform actually enforces.
+    var LIMITS = [
+      { name: "X post", max: 280 },
+      { name: "SMS, single message", max: 160 },
+      { name: "Meta description", max: 160 },
+      { name: "Title tag", max: 60 },
+      { name: "Instagram caption", max: 2200 },
+      { name: "LinkedIn post", max: 3000 }
+    ];
+
+    var SAMPLE = [
+      "The best tools disappear while you use them.",
+      "",
+      "You open the tab, do the one thing you came to do, and close it again.",
+      "No account, no cookie banner, no upload. The work happens on your own",
+      "machine and stops there. That is the whole idea behind every tool here,",
+      "and it is why none of them need a server to be useful.",
+      "",
+      "Try editing this text and watch every number update as you type."
+    ].join("\n");
+
+    var STATS = [
+      { key: "characters", label: "Characters" },
+      { key: "charactersNoSpaces", label: "Characters, no spaces" },
+      { key: "words", label: "Words" },
+      { key: "sentences", label: "Sentences" },
+      { key: "paragraphs", label: "Paragraphs" },
+      { key: "lines", label: "Lines" }
+    ];
+
+    var current = null;
+
+    function fmt(n) { return n.toLocaleString(); }
+
+    function renderStats(s) {
+      grid.innerHTML = "";
+      STATS.forEach(function (stat) {
+        var cell = document.createElement("div");
+        cell.className = "cc-stat";
+        var num = document.createElement("div");
+        num.className = "n";
+        num.textContent = fmt(s[stat.key]);
+        var lab = document.createElement("div");
+        lab.className = "l";
+        lab.textContent = stat.label;
+        cell.appendChild(num);
+        cell.appendChild(lab);
+        grid.appendChild(cell);
+      });
+
+      [["Reading time", s.readingSeconds], ["Speaking time", s.speakingSeconds]]
+        .forEach(function (pair) {
+          var cell = document.createElement("div");
+          cell.className = "cc-stat time";
+          var num = document.createElement("div");
+          num.className = "n";
+          num.textContent = formatDuration(pair[1]);
+          var lab = document.createElement("div");
+          lab.className = "l";
+          lab.textContent = pair[0];
+          cell.appendChild(num);
+          cell.appendChild(lab);
+          grid.appendChild(cell);
+        });
+    }
+
+    function renderNote(s) {
+      if (s.codePoints !== s.characters) {
+        note.textContent = "This text contains characters that take two units each, " +
+          "such as emoji. It is " + fmt(s.codePoints) + " characters to a reader but " +
+          fmt(s.characters) + " to a platform counting the limit.";
+        note.style.display = "block";
+      } else {
+        note.style.display = "none";
+      }
+    }
+
+    function renderLimits(s) {
+      limitBox.innerHTML = "";
+      LIMITS.forEach(function (limit) {
+        var used = s.characters;
+        var over = used > limit.max;
+        var pct = Math.min(100, limit.max === 0 ? 0 : used / limit.max * 100);
+
+        var row = document.createElement("div");
+        row.className = "cc-limit" + (over ? " over" : "");
+
+        var head = document.createElement("div");
+        head.className = "cc-limit-head";
+        var name = document.createElement("span");
+        name.textContent = limit.name;
+        var count = document.createElement("span");
+        count.className = "c";
+        count.textContent = over
+          ? fmt(used - limit.max) + " over"
+          : fmt(limit.max - used) + " left";
+        head.appendChild(name);
+        head.appendChild(count);
+
+        var bar = document.createElement("div");
+        bar.className = "cc-bar";
+        var fill = document.createElement("div");
+        fill.className = "cc-fill";
+        fill.style.width = pct + "%";
+        bar.appendChild(fill);
+
+        row.appendChild(head);
+        row.appendChild(bar);
+        limitBox.appendChild(row);
+      });
+    }
+
+    function render() {
+      current = countText(input.value);
+      renderStats(current);
+      renderNote(current);
+      renderLimits(current);
+      localStorage.setItem(STORE, input.value);
+    }
+
+    input.addEventListener("input", render);
+
+    // restore draft, or start empty
+    var saved = localStorage.getItem(STORE);
+    input.value = saved !== null ? saved : "";
+    render();
+
+    document.getElementById("cc-sample").onclick = function () {
+      input.value = SAMPLE; render(); input.focus();
+    };
+    document.getElementById("cc-clear").onclick = function () {
+      input.value = ""; render(); input.focus();
+    };
+    document.getElementById("cc-copy").onclick = function () {
+      var s = current;
+      var lines = STATS.map(function (stat) {
+        return stat.label + ": " + fmt(s[stat.key]);
+      });
+      lines.push("Reading time: " + formatDuration(s.readingSeconds));
+      lines.push("Speaking time: " + formatDuration(s.speakingSeconds));
+      copyText(lines.join("\n"), "Stats copied to clipboard");
+    };
+    document.getElementById("cc-paste").onclick = function () {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(function (t) {
+          input.value = t; render();
+        }).catch(function () { toast("Couldn't read clipboard, paste manually"); });
+      } else {
+        toast("Clipboard not available, paste manually");
+      }
+    };
+
+    document.querySelectorAll(".year").forEach(function (el) {
+      el.textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>

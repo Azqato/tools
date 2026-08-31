@@ -1,8 +1,8 @@
 # Design System - Azqato's Tools
 
-**Last verified against the code:** 2026-08-25 (`css/style.css`, 565 lines, ~14.9KB)
+**Last verified against the code:** 2026-08-25, updated 2026-08-31 for v0.2.0 (`css/style.css`, 645 lines, ~16.6KB)
 
-Every value in this document was read out of `css/style.css` or the four HTML pages
+Every value in this document was read out of `css/style.css` or the five HTML pages
 rather than inferred. Where the code and an earlier version of this document
 disagreed, both readings are kept and the conflict is marked as a discrepancy for the
 author to resolve rather than silently corrected.
@@ -104,11 +104,11 @@ declared once on `:root` and shared by both themes.
 | `color-mix(in srgb, var(--danger) 14%, transparent)` | Removed-param chip background |
 | `color-mix(in srgb, var(--danger) 30%, transparent)` | Removed-param chip border |
 | `#fff` | Text on `.btn.primary` and on the logo mark, in both themes |
-| `#5b5bf0` | Favicon data URI background on all four pages, hardcoded in the `<link rel="icon">` SVG, equal to the light-theme `--accent` |
+| `#5b5bf0` | Favicon data URI background on all five pages, hardcoded in the `<link rel="icon">` SVG, equal to the light-theme `--accent` |
 
 The favicon hex is the one place a token value is duplicated as a literal. It cannot
 reference a custom property because it lives inside a data URI in `<head>`. If
-`--accent` changes, the favicon in all four HTML files must be changed by hand.
+`--accent` changes, the favicon in all five HTML files must be changed by hand.
 
 ---
 
@@ -328,7 +328,7 @@ contains several `<section class="wrap">` blocks (hero, tools, about).
 - Bottom border in `--border`
 - Contents in order: brand (logo mark plus wordmark), `.spacer`, four nav links, theme
   toggle icon button
-- Nav links, identical on all four pages: Azqato (`https://azqato.com/`), Projects
+- Nav links, identical on all five pages: Azqato (`https://azqato.com/`), Projects
   (`https://azqato.com/projects`), Tools (`https://azqato.github.io/tools/`), Support
   (`https://azqato.github.io/support.html`)
 - The Tools link points at the deployed site rather than at the relative `index.html`,
@@ -506,6 +506,43 @@ overflowing. Its container `.lc-result` is `display: none` until the JavaScript 
 `.stat-line` beneath it summarises counts, with `<b>` elements promoted from
 `--text-soft` to `--text` to make the numbers stand out without a color change.
 
+### Stat grid and limit bars
+
+Introduced by the Character Counter in v0.2.0. Two related patterns, both new to the
+system, and both reusable by any future tool that reports numbers about user input.
+
+`.cc-grid` is an auto-fitting grid (`repeat(auto-fit, minmax(150px, 1fr))`, 14px gap)
+of `.cc-stat` cells. Note `auto-fit`, not the `auto-fill` used by `.tools-grid` and
+`.fav-grid`: `auto-fit` collapses empty tracks so the eight cells stay evenly
+distributed at every width instead of leaving a gap on the right. Each cell is a
+standard `--bg-elev` card at `--radius` with:
+
+- `.n`, the number: `1.7rem`, weight 700, `letter-spacing: -.03em`, `line-height: 1.15`
+- `.l`, the label: `0.82rem` in `--text-soft`
+
+`.cc-stat.time` is the derived-value variant used for reading and speaking time. It
+swaps the background to `--bg-inset` and drops `.n` to `1.25rem` in `--accent`, which
+separates a computed estimate from a literal count without adding a second card shape.
+When a future tool distinguishes measured from estimated numbers, follow this.
+
+`.cc-limits` is a second auto-fit grid (`minmax(240px, 1fr)`, `16px 22px` gap) of
+`.cc-limit` rows. Each row is a `.cc-limit-head` (name on the left, remaining or
+overage on the right, baseline-aligned) above a `.cc-bar` track:
+
+- `.cc-bar`: 6px tall, fully rounded, `--bg-inset` fill with a `--border` outline and
+  `overflow: hidden` so the fill clips to the rounded ends
+- `.cc-fill`: `--accent`, width set as an inline percentage by JavaScript, clamped to
+  100% so an over-limit bar reads as full rather than overflowing its track
+- `.cc-limit.over` recolors both the count and the fill to `--danger`
+
+The over-limit state is the one place in the project where `--danger` signals a state
+rather than a removal. It is deliberately not an error: going over a limit is
+information, not a mistake, so there is no icon, no toast, and no blocked action.
+
+**Progress bars are new to the system and this is the only one.** A second one should
+reuse `.cc-bar` and `.cc-fill` rather than inventing a variant, and the classes should
+be renamed away from the `cc-` prefix at that point.
+
 ### Footers
 
 There are two footer variants and they are not interchangeable.
@@ -513,13 +550,14 @@ There are two footer variants and they are not interchangeable.
 **Landing page footer** (`index.html`): copyright with a JS-injected year, spacer, then
 four links mirroring the topbar (Azqato, Projects, Tools, Support).
 
-**Tool page footer** (all three tool pages): copyright with a JS-injected year, spacer,
+**Tool page footer** (all four tool pages): copyright with a JS-injected year, spacer,
 a "Home" link back to `index.html`, and a faint one-line reassurance specific to the
 tool:
 
 - Markdown Editor: "Runs 100% in your browser"
 - Favicon Downloader: "Icons via Google's public favicon service"
 - Link Cleaner: "Your links never leave your device"
+- Character Counter: "Your text never leaves your device"
 
 The reassurance line is a deliberate pattern: each tool states in its own footer where
 its data goes. The Favicon Downloader is the only one that names an external service,
@@ -529,7 +567,7 @@ kind, and it must be true.
 The year element differs between the two variants: `index.html` uses `id="year"` with a
 one-line inline script, while the tool pages use `class="year"` with a
 `querySelectorAll` loop at the end of their page script. Both produce the same result.
-New tool pages should follow the `class="year"` form, which is dominant three files to
+New tool pages should follow the `class="year"` form, which is dominant four files to
 one.
 
 ---
@@ -560,7 +598,7 @@ one.
 - Every interactive element is a native `<button>`, `<a>`, `<input>`, or `<textarea>`.
   There are no div-based controls anywhere in the project, so tab order and activation
   behaviour come free from the browser.
-- Tab order follows DOM order on all four pages, which matches visual order.
+- Tab order follows DOM order on all five pages, which matches visual order.
 - `.field:focus` removes the native outline and substitutes a 3px `--accent-soft` ring.
   A color-only ring is a weaker indicator than the outline it replaces.
 - Buttons and links do **not** suppress the native focus ring. Only `.field` and

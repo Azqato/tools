@@ -156,8 +156,9 @@ scope by definition.
 | Link Cleaner: 48 exact-name and 11 prefix tracking rules, removed and kept chips, copy, open, paste from clipboard, Ctrl+Enter shortcut | v0.1.0 | `link-cleaner.html`, `js/linkcleaner.js` |
 | External tool cards with `external` badge and diagonal arrow | v0.1.1 | `index.html` |
 | Responsive layout, two breakpoints | v0.1.0 | `css/style.css` |
-| Site-wide navigation shared with other Azqato properties | v0.1.5 | all four pages |
+| Site-wide navigation shared with other Azqato properties | v0.1.5 | all five pages |
 | Protein Tracker external card | v0.1.7 | `index.html` |
+| Character Counter: live character, word, sentence, paragraph and line counts, reading and speaking time estimates, six platform limit bars, draft autosave, copy stats | v0.2.0 | `character-counter.html`, `js/charactercounter.js` |
 
 ### Future, post-launch, unordered
 
@@ -168,10 +169,16 @@ Tool candidates, all of which must be buildable with zero dependencies:
 - **JSON formatter**: paste minified JSON, get pretty-printed output with a tree view
 - **Password generator**: configurable length, character sets, entropy display
 - **Image compressor**: client-side compression through the Canvas API, no upload
-- **Word and character counter**: with a reading time estimate
 - **Diff tool**: paste two text blocks, see a line-by-line diff
 - **QR code generator**: URL or text to QR, download as PNG or SVG
 - **Timestamp converter**: Unix epoch to human-readable, any timezone
+- **Bookmark manager**: an editor for a bookmark collection that is advanced in what it
+  lets you do but simple to use. It imports the HTML bookmarks file that Chrome exports
+  (the Netscape bookmark format, which Firefox, Safari, and Edge all read and write
+  too), lets the user edit each bookmark's URL and display name, and exports the same
+  format back so the result can be imported into Chrome again. The collection is held in
+  browser storage on the user's own device, so the tool never sees a server. Scope,
+  constraints, and the open questions on it are set out in the milestone breakdown below
 
 Platform work:
 
@@ -237,7 +244,7 @@ something.
 
 ## Success criteria
 
-- All three hosted tools function correctly on Chrome, Firefox, Edge, and Safari with
+- All four hosted tools function correctly on Chrome, Firefox, Edge, and Safari with
   no network request carrying user input.
 - A new tool can be added by following the documented pattern, modifying only
   `index.html` plus the new tool's own files.
@@ -315,7 +322,7 @@ the tool.
 
 ### Current phase: Foundation, v0.1.x
 
-The site is deployed and working. Three hosted tools, four external links, a complete
+The site is deployed and working. Four hosted tools, four external links, a complete
 design system, shared JavaScript, and a full documentation suite are all in place. The
 focus now is adding tools and closing the accessibility gaps recorded in `DESIGN.md`.
 
@@ -326,8 +333,9 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 | v0.1.0 - Initial build | 2026-06-27 | Complete |
 | v1.0.0 - Public deployment to GitHub Pages | 2026-06-27 | Complete |
 | v0.1.8 - Documentation audit and em dash sweep | 2026-08-25 | Complete |
-| v0.2.0 - Second tool batch | TBD | Planned |
-| v0.3.0 - Accessibility pass | TBD | Planned |
+| v0.2.0 - Second tool batch, first tool shipped | 2026-08-31 | In Progress |
+| v0.3.0 - Bookmark Manager | TBD | Planned |
+| v0.4.0 - Accessibility pass | TBD | Planned |
 
 > **Discrepancy (open).** The milestone table inherited from the previous version of
 > this document lists v1.0.0 as Complete while the project version is still v0.1.x and
@@ -348,12 +356,60 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 - External tool cards (Screener, Net Worth Tracker, VIX Strategy)
 - Documentation suite (README, PRD, DESIGN, PATCHNOTES)
 
-### v0.2.0 planned
+### v0.2.0, in progress
 
-- Two or three additional tools from the Future list, exact tools not yet chosen
+- **Character Counter, shipped 2026-08-31.** Live counts for characters with and without
+  spaces, words, sentences, paragraphs, and lines, plus reading and speaking time
+  estimates and six platform limit bars
+- One or two further tools from the Future list, exact tools not yet chosen
 - Landing page copy revisit once the grid exceeds eight cards
 
-### v0.3.0 planned
+### v0.3.0 planned: Bookmark Manager
+
+A larger tool than anything shipped so far, and the first one that owns a user's data
+rather than transforming a single input, so it is given its own milestone rather than
+being folded into a tool batch.
+
+**Scope:**
+
+- Import the HTML bookmarks file Chrome exports, the Netscape bookmark format, which is
+  a nested `<DL>` list of `<DT><A HREF="..." ADD_DATE="...">Name</A>` entries. Firefox,
+  Safari, and Edge read and write the same format, so an importer written once serves
+  every browser
+- Edit each bookmark's URL and display name, which are the two fields the requirement
+  names and the two that matter for a re-import
+- Add and delete bookmarks, since an editor that cannot remove a dead link is not an
+  editor
+- Export the same format back, so the result imports cleanly into Chrome
+- Hold the collection in the browser on the user's own device, under a documented
+  `localStorage` key, so the tool works offline and contacts nothing
+- "Advanced but simple": the power comes from bulk operations (search and filter across
+  the whole collection, edit in place without a modal, multi-select delete) rather than
+  from a dense interface. The default view should be a plain list a person can scan
+
+**Open design questions to resolve before building, not now:**
+
+- Folder structure. Chrome's export is a tree, and preserving folders on a round trip is
+  most of the parsing difficulty. Flattening the tree is far simpler and loses the user's
+  organisation. This decision sets the size of the whole tool
+- Storage limit. `localStorage` gives roughly 5MB per origin. A large bookmark
+  collection with favicons could approach that, and the project currently has no guard on
+  any storage write. IndexedDB has no practical limit but is a new API surface for this
+  codebase. Measure a real export before choosing
+- Whether to show favicons. It would make the list far easier to scan, and the Favicon
+  Downloader already has the fetching code, but it would mean sending every bookmarked
+  domain to Google. That is a direct tension with tenet 1 and must be opt-in and off by
+  default if it happens at all
+- Whether import replaces or merges with an existing collection. Replacing silently
+  destroys work; merging needs a duplicate rule
+
+**Constraints it must respect:** no dependencies, so the Netscape format parser is
+hand-written like the Markdown parser; no server, so import and export are both local
+file operations through `FileReader` and a Blob download; and the collection is the
+user's data, so the storage key goes on the public surface list and can never be renamed
+without a migration read.
+
+### v0.4.0 planned: accessibility pass
 
 - `prefers-reduced-motion` CSS block
 - Skip-to-content link on all pages
@@ -423,22 +479,26 @@ is not the outcome the project exists for.
 | JavaScript errors on load | Zero | Browser console |
 | Uptime | Whatever GitHub Pages provides | GitHub status page. No independent monitor exists |
 
-Measured page weights as of 2026-08-25:
+Measured page weights as of 2026-08-31:
 
 | File | Bytes |
 |------|-------|
-| `index.html` | 10,261 |
-| `css/style.css` | 14,870 |
+| `index.html` | 11,035 |
+| `css/style.css` | 16,594 |
 | `js/common.js` | 2,020 |
 | `js/markdown.js` | 6,984 |
-| `js/linkcleaner.js` | 2,248 |
-| `markdown-preview.html` | 7,319 |
-| `favicon-downloader.html` | 6,789 |
-| `link-cleaner.html` | 6,275 |
+| `js/linkcleaner.js` | 2,246 |
+| `js/charactercounter.js` | 2,319 |
+| `markdown-preview.html` | 7,311 |
+| `favicon-downloader.html` | 6,784 |
+| `link-cleaner.html` | 6,264 |
+| `character-counter.html` | 9,168 |
 
-Landing page total (`index.html` plus `style.css` plus `common.js`): 27,151 bytes.
+Landing page total (`index.html` plus `style.css` plus `common.js`): 29,649 bytes.
 Heaviest single page (Markdown Editor: HTML plus CSS plus `common.js` plus
-`markdown.js`): 31,193 bytes. Both are comfortably inside the 100KB target.
+`markdown.js`): 32,909 bytes. The Character Counter is 30,101 bytes. All are
+comfortably inside the 100KB target, though note that `style.css` is shared and grows
+with every tool, so it is the figure to watch as the grid fills out.
 
 ### Reporting cadence
 
@@ -563,6 +623,8 @@ because there is no server to hold the secret and a static site cannot keep one.
 | Nested list renders flat | The parser does not support nesting. Indented continuation lines are folded into the parent item | Known limitation, deferred. See the deferred table above |
 | A `\|` inside a table cell splits the cell | Cells are split on a naive `String.split("\|")`. Pipe escaping is not implemented | Avoid pipes in table cells, or use inline code around them (which does not help, since the split happens first) |
 | Link Cleaner strips a parameter that was needed | The parameter name matches a rule, most likely `amp`, `spm`, `scm`, or `trk`, which are generic enough to collide with legitimate use | Copy the original URL and re-add the parameter by hand. Custom rules are on the Future list |
+| Character Counter sentence count looks too high | The text contains abbreviations such as "e.g." or "Mr. Smith", which the terminator regex reads as sentence ends | Expected limitation. Fixing it needs an abbreviation dictionary, which is a dependency. The count is documented as an estimate |
+| Character Counter character count differs from another tool's | This tool counts UTF-16 code units, matching `maxlength` and platform limits. A tool counting code points reports fewer for emoji | Not a bug. The page shows a note whenever the two differ, and reports both numbers |
 | Live site does not show a pushed change | Pages has not finished rebuilding, or the browser cached the old file | Wait a minute and hard-reload. Check the Actions tab for a failed deploy |
 
 ### Monitoring
@@ -592,10 +654,11 @@ serverless function, and no API owned by this project.
 ```
 User's browser
   └── loads static files from GitHub Pages (or the local filesystem)
-        ├── css/style.css        design system, loaded by all four pages
-        ├── js/common.js         theme, toast, clipboard. Loaded by all four pages
+        ├── css/style.css        design system, loaded by all five pages
+        ├── js/common.js         theme, toast, clipboard. Loaded by all five pages
         ├── js/markdown.js       Markdown parser. Markdown Editor only
         ├── js/linkcleaner.js    URL param stripper. Link Cleaner only
+        ├── js/charactercounter.js  Text statistics. Character Counter only
         └── inline <script>      per-page glue code, at the end of each tool page
 ```
 
@@ -640,13 +703,15 @@ See Conventions.
 ├── markdown-preview.html       Markdown Editor tool page
 ├── favicon-downloader.html     Favicon Downloader tool page
 ├── link-cleaner.html           Link Cleaner tool page
+├── character-counter.html      Character Counter tool page
 ├── initialconcept.txt          Original one-paragraph brief. Reference only, not served
 ├── css/
 │   └── style.css               The entire design system. Every page loads this
 ├── js/
 │   ├── common.js               Theme toggle, toast, copyText. Loaded by every page
 │   ├── markdown.js             Self-contained Markdown to HTML parser
-│   └── linkcleaner.js          Tracking-parameter detection and removal
+│   ├── linkcleaner.js          Tracking-parameter detection and removal
+│   └── charactercounter.js     Text statistics and duration formatting
 └── docs/
     ├── PRD.md                  This file
     ├── DESIGN.md               Visual system, component rules, accessibility
@@ -669,25 +734,29 @@ CI configuration files.
 ### Data models
 
 There is no server-side data. The only persisted state is in the browser's
-`localStorage`, and there are exactly two keys.
+`localStorage`, and there are exactly three keys.
 
 | Key | Type | Value | Written by | Read by | Lifetime |
 |-----|------|-------|-----------|---------|----------|
 | `azqato-theme` | string | `"light"` or `"dark"` | `js/common.js`, on every toggle click | `js/common.js`, at load, before anything else | Until the user clears site data |
 | `azqato-md-draft` | string | The full raw Markdown in the editor | `markdown-preview.html`, on every `input` event and on every programmatic render | `markdown-preview.html`, at load | Until the user clears site data |
+| `azqato-cc-draft` | string | The full raw text in the Character Counter | `character-counter.html`, on every `input` event and on every programmatic render | `character-counter.html`, at load | Until the user clears site data |
 
-Neither key is namespaced beyond the `azqato-` prefix, and neither is versioned. If the
-draft format ever changes (it is a plain string today, so it is hard to see how) there
-is no migration path.
+No key is namespaced beyond the `azqato-` prefix, and none is versioned. If a draft
+format ever changes (both drafts are plain strings today, so it is hard to see how)
+there is no migration path. The two draft keys are independent: the Markdown Editor and
+the Character Counter never see each other's text.
 
 No cookies. No IndexedDB. No `sessionStorage`. No service worker cache.
 
-**Absence of write guards.** Neither `localStorage.setItem` call is wrapped in a
-`try/catch`. In a browser where storage is disabled or the quota is exhausted, the
-write throws and the surrounding handler dies. For the theme toggle that means the
-theme changes visually but does not persist; for the editor it means the `render()`
-call throws after having already updated the DOM, so the preview updates but the
-character count may not. Neither has been observed in practice.
+**Absence of write guards.** None of the three `localStorage.setItem` calls is wrapped
+in a `try/catch`. In a browser where storage is disabled or the quota is exhausted, the
+write throws and the surrounding handler dies. For the theme toggle that means the theme
+changes visually but does not persist. For the Markdown Editor and the Character
+Counter the write is the last statement in `render()`, so the visible output is already
+updated by the time it throws, and the only loss is persistence. None of this has been
+observed in practice, and the ordering that limits the damage is luck rather than
+design: a new tool that writes before rendering would break visibly.
 
 **In-memory state, not persisted:**
 
@@ -697,6 +766,10 @@ character count may not. Neither has been observed in practice.
 | Link Cleaner | `EXAMPLE` | string | The demo URL loaded by "Try an example" |
 | Favicon Downloader | `SIZES` | number array | `[16, 32, 48, 64, 128, 256]` |
 | Markdown Editor | `SAMPLE` | string | The document shown on a first visit |
+| Character Counter | `current` | object | The most recent `CountResult`, read by the Copy stats button |
+| Character Counter | `LIMITS` | array | Platform name and character maximum for the six limit bars |
+| Character Counter | `STATS` | array | Which `CountResult` keys to show as cells, and their labels |
+| Character Counter | `SAMPLE` | string | The text loaded by "Try an example" |
 | `common.js` | `toastEl`, `timer` | element, timeout id | The toast singleton and its dismiss timer |
 
 ### API design, internal data flow
@@ -804,6 +877,55 @@ Two notes on that list, both verified by reading the source:
    first, so this entry can never match either. The lowercase form `trkcampaign` is not
    in the set. Recorded as technical debt.
 
+**`js/charactercounter.js`** attaches two globals. Like the other two tool modules it
+never touches the DOM, so every function is a pure function over its arguments:
+
+| Function | Parameters | Returns | Behaviour |
+|----------|-----------|---------|-----------|
+| `window.countText(src)` | `src: string` | `CountResult` | Computes every statistic in one pass over the string. Never throws: `null`, `undefined`, and non-strings are coerced with `String()`, and an empty string returns all zeros |
+| `window.formatDuration(total)` | `total: number` of seconds | `string` | Formats as `"0 sec"`, `"42 sec"`, `"2 min"`, or `"1 min 35 sec"`. Whole minutes omit the seconds part |
+
+```js
+CountResult = {
+  characters: number,          // UTF-16 code units, what maxlength counts
+  charactersNoSpaces: number,  // characters with all whitespace removed
+  codePoints: number,          // Unicode code points, what a reader sees
+  words: number,
+  sentences: number,
+  paragraphs: number,
+  lines: number,
+  readingSeconds: number,      // words / 238 wpm, rounded
+  speakingSeconds: number      // words / 130 wpm, rounded
+}
+```
+
+Counting rules, stated exactly because they are judgement calls rather than facts:
+
+- **characters** is `src.length`, UTF-16 code units. An emoji or other astral character
+  counts as 2. This is deliberate: it matches what `maxlength` and what every platform
+  limit in the tool actually enforce, which is the tool's main use. **codePoints** is
+  the count a human would give, and the page shows a note explaining the gap whenever
+  the two differ, rather than quietly picking one.
+- **words** splits the trimmed string on `/\s+/`. Hyphenated and apostrophised forms
+  count as one word. Whitespace-only input is zero, not one.
+- **sentences** counts runs of `.`, `!`, `?`, or `…` followed by whitespace or the end
+  of the string, and falls back to 1 when the text has content but no terminator. **This
+  is an estimate and will overcount abbreviations** such as "e.g." or "Mr. Smith". A
+  correct implementation needs an abbreviation dictionary, which is a dependency.
+- **paragraphs** splits on a blank line (`/\n\s*\n/`) and counts the non-empty pieces.
+- **lines** counts newline-separated pieces, handling CRLF, LF, and lone CR. An empty
+  string is 0 lines rather than 1.
+- **readingSeconds** uses 238 words per minute, the pooled mean for adult silent reading
+  of English prose from Brysbaert's 2019 meta-analysis. **speakingSeconds** uses 130,
+  the middle of the usual range for a prepared talk. Both constants are at the top of
+  the module and are the only numbers worth arguing about in it.
+
+**Character Counter page glue**, inline in `character-counter.html`: holds the `LIMITS`
+array (name and maximum for X, SMS, meta description, title tag, Instagram, LinkedIn),
+the `STATS` display list, and the `SAMPLE` text. Limit bars are measured against
+`characters` and their fill width is clamped to 100%, so an over-limit bar reads as full
+rather than overflowing its track.
+
 **Favicon Downloader**, inline in `favicon-downloader.html`:
 
 | Function | Parameters | Returns | Behaviour and error states |
@@ -824,8 +946,8 @@ State is entirely local to a page. There is no shared runtime state, no store, n
 bus, and no cross-page messaging. Each page declares its own top-level `var`s in the
 inline script at the bottom of the file and mutates them directly.
 
-The only state that crosses a page boundary is the two `localStorage` keys. Theme is
-read by every page; the Markdown draft is read by one.
+The only state that crosses a page boundary is the three `localStorage` keys. Theme is
+read by every page; each draft key is read by exactly one page.
 
 The only state that crosses a *component* boundary within a page is the toast
 singleton in `common.js`, which is module-private inside its IIFE and reachable only
@@ -850,11 +972,12 @@ outbound links; no data is passed to them and no code is loaded from them.
 | Total page weight, any page | Under 100KB uncompressed | Met. Heaviest page is 31KB |
 | Lighthouse Performance | 90 or above | Not measured |
 | First Contentful Paint | Under 1.0s | Not measured |
-| Render-blocking resources | CSS in `<head>`, all JS at the end of `<body>` | Met on all four pages |
+| Render-blocking resources | CSS in `<head>`, all JS at the end of `<body>` | Met on all five pages |
 | External font requests | Zero | Met. System font stacks only |
 | Third-party scripts | Zero | Met |
 | Images shipped with the site | Zero | Met. Every icon is inline SVG or a data URI |
 | HTTP requests for a cold landing page load | Three (HTML, CSS, JS) | Met |
+| HTTP requests for a cold tool page load | Four at most (HTML, CSS, `common.js`, tool module) | Met |
 
 ### Known technical debt
 
@@ -870,9 +993,9 @@ outbound links; no data is passed to them and no code is loaded from them.
 | Two unlabelled inputs | `#fav-input` and `#md-input` rely on placeholders | Add real `<label>` elements, visually hidden if the design does not want them |
 | Theme flash | `common.js` loads at the end of `<body>` while `<html>` hardcodes `data-theme="light"` | Move the localStorage read to an inline `<script>` in `<head>` |
 | Silent clipboard failure | `copyText`'s `execCommand` fallback swallows its exception and shows no toast | Toast a failure message in the `catch` |
-| Unguarded `localStorage` writes | Neither write is wrapped in `try/catch` | Wrap both; degrade to non-persistent behaviour instead of throwing |
+| Unguarded `localStorage` writes | None of the three writes is wrapped in `try/catch` | Wrap all three; degrade to non-persistent behaviour instead of throwing. The cost of this grows with every tool that autosaves |
 | Favicon download CORS fallback | When `fetch` fails, falls back to `window.open` and asks the user to right-click | No better fix exists without a proxy server, which tenet 1 forbids. This one is accepted permanently rather than owed |
-| Duplicated page chrome | The topbar, footer, and favicon data URI are copy-pasted into four HTML files. A nav change means four edits | A build step or a runtime template would fix it and would break tenet 3. Accepted. The mitigation is the checklist in Working Practice |
+| Duplicated page chrome | The topbar, footer, and favicon data URI are copy-pasted into five HTML files. A nav change means five edits, one more with every tool added | A build step or a runtime template would fix it and would break tenet 3. Accepted. The mitigation is the checklist in Working Practice |
 | Inline styles in `index.html` | The about section's layout lives in `style` attributes rather than a class | Move to a named class in `style.css` |
 | No tests of any kind | There is no runner and no runtime to run one | The manual checklist in Working Practice is the substitute. A real fix needs Node, which the constraints forbid |
 
@@ -928,7 +1051,7 @@ and Removal section.
 | CSS leading zeros | Omitted. `.15s`, `.92rem`, `.06em` | Consistent throughout |
 | CSS section markers | Banner comments in a `/* === */` box for major sections, single-line `/* ---- name ---- */` for minor ones | |
 | HTML attribute order | `class`, then `id`, then `href`/`src`, then everything else | Loosely held |
-| Inline SVG | Written inline in HTML with `viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, and a stroke width of 2 (2.5 or 3 for small emphasis icons) | Consistent across all four pages |
+| Inline SVG | Written inline in HTML with `viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, and a stroke width of 2 (2.5 or 3 for small emphasis icons) | Consistent across all five pages |
 
 ### Organization
 
@@ -1089,9 +1212,9 @@ restricted pages. Everything served is served identically to everyone.
 
 ### Data storage
 
-**What is stored:** two `localStorage` keys, `azqato-theme` and `azqato-md-draft`, both
-in the visitor's own browser and neither transmitted anywhere. See Data models for the
-full description.
+**What is stored:** three `localStorage` keys, `azqato-theme`, `azqato-md-draft`, and
+`azqato-cc-draft`, all in the visitor's own browser and none transmitted anywhere. See
+Data models for the full description.
 
 **What is not stored:** URLs cleaned by the Link Cleaner, domains looked up in the
 Favicon Downloader, and any other tool input. None of it is persisted beyond the page
@@ -1194,15 +1317,19 @@ project that is:
 - `/markdown-preview.html`
 - `/favicon-downloader.html`
 - `/link-cleaner.html`
+- `/character-counter.html`
 - `/css/style.css`
 - `/js/common.js`
 - `/js/markdown.js`
 - `/js/linkcleaner.js`
-- The three `window` globals the shared scripts define, `window.toast`,
-  `window.copyText`, `window.mdToHtml`, and `window.cleanUrl`, because a page in this
-  repository imports them by name across a file boundary
-- The two `localStorage` keys, `azqato-theme` and `azqato-md-draft`, because a returning
-  visitor's browser holds data under those exact names
+- `/js/charactercounter.js`
+- The six `window` globals the shared scripts define, `window.toast`,
+  `window.copyText`, `window.mdToHtml`, `window.cleanUrl`, `window.countText`, and
+  `window.formatDuration`, because a page in this repository imports them by name across
+  a file boundary
+- The three `localStorage` keys, `azqato-theme`, `azqato-md-draft`, and
+  `azqato-cc-draft`, because a returning visitor's browser holds data under those exact
+  names
 
 **Internal** means everything else: `README.md`, everything in `/docs`,
 `initialconcept.txt`, individual CSS class names, DOM ids, and any function private to
@@ -1320,8 +1447,8 @@ This section is worth more than the confident parts of the document.
 | `js/markdown.js` inline rules | Six overlapping regex replacements applied in sequence to the same string. Changing the order, or making one less greedy, changes the output of the others. The bold and italic underscore rules use lookarounds that are easy to break by accident |
 | `js/markdown.js` NUL sentinel | A raw `0x00` byte in the source. Tools that treat NUL as a binary marker (`grep` does) behave oddly on this file. Any editor that strips or normalises it silently breaks inline code rendering |
 | The gstatic dependency | Undocumented, unversioned, and not covered by any contract. It can change or disappear without notice, and the Favicon Downloader has no fallback |
-| Four copies of the page chrome | The topbar, the footer skeleton, and the favicon data URI are duplicated across four HTML files. Any nav or brand change requires four identical edits, and there is nothing to catch it when only three are made. This has already caused one bug: the stale `../index.html#tools` path fixed in v0.1.5 |
-| No tests, anywhere | There is no runner, no runtime, and no assertion in the project. Every change is verified by looking at it |
+| Five copies of the page chrome | The topbar, the footer skeleton, and the favicon data URI are duplicated across five HTML files. Any nav or brand change requires five identical edits, and there is nothing to catch it when only four are made. This has already caused one bug: the stale `../index.html#tools` path fixed in v0.1.5. The cost of this grows by one file with every tool shipped, and it is the strongest argument the project has against tenet 3 |
+| No tests, anywhere | There is no runner, no runtime, and no assertion committed to the project. Every change is verified by looking at it. `js/charactercounter.js` is the one module whose logic has been verified by assertion rather than by eye, using a throwaway harness driven by headless Edge (see "A note on testing" below). That harness was not committed |
 | `master` is the deploy branch | A push is a deploy. There is no review gate, no CI check, and no staging step between an edit and the live site |
 | `.field:focus` and `#md-input:focus` | Both suppress the native outline. The first substitutes a ring, the second substitutes nothing. Easy to lose track of when restyling |
 | Generic tracking parameter names | `amp`, `spm`, `scm`, and `trk` are broad enough to strip a parameter a site legitimately uses. The tool shows what it removed, which is the mitigation, but a user who does not look will not notice |
@@ -1411,7 +1538,7 @@ Concrete instructions for anyone, human or model, doing future work in this proj
 | Adding a new tool | This file, "How to add a new tool" below | `DESIGN.md` page scaffold and component patterns |
 | Changing a color, radius, or font | `DESIGN.md`, Color palette and Typography | `css/style.css` |
 | Changing layout or a breakpoint | `DESIGN.md`, Breakpoints and Component patterns | `css/style.css` |
-| Changing navigation, the topbar, or a footer | `DESIGN.md`, Topbar and Footers | All four HTML files, every time |
+| Changing navigation, the topbar, or a footer | `DESIGN.md`, Topbar and Footers | All five HTML files, every time |
 | Changing Markdown parsing | This file, API design and Risks | `js/markdown.js` |
 | Changing tracking rules | This file, API design | `js/linkcleaner.js` |
 | Changing the theme or toast behaviour | `DESIGN.md`, Toast, and this file, API design | `js/common.js` |
@@ -1488,6 +1615,10 @@ There is no test suite. Verification is manual and these are the exact steps:
      copy one link
    - Link Cleaner: click "Try an example" and confirm the removed and kept chips are
      correct; Copy; Ctrl+Enter in the textarea
+   - Character Counter: click "Try an example" and confirm the counts read 379
+     characters, 75 words, 6 sentences, 3 paragraphs, 8 lines, 19 sec reading, 35 sec
+     speaking; confirm four limit bars turn red and two stay accent-colored; Copy stats;
+     reload and confirm the draft survived
    - Narrow the window below 760px and confirm the editor stacks and the nav links
      disappear; below 560px confirm the favicon form stacks
 6. Search for em dashes before committing:
@@ -1497,6 +1628,35 @@ There is no test suite. Verification is manual and these are the exact steps:
    ```
 7. Commit with a `type: lowercase imperative summary` message, one logical change per
    commit.
+
+### A note on testing, and a technique worth reusing
+
+The project has no test runner and cannot have one under its constraints, but pure logic
+modules can still be verified by assertion rather than by eye. The technique used for
+`js/charactercounter.js` in v0.2.0:
+
+1. Write a throwaway `_test.html` at the repository root that loads the real module with
+   a normal `<script src>`, runs assertions against it, and writes the results into a
+   `<pre>`.
+2. Serve the site with `python -m http.server 8080`.
+3. Dump the rendered DOM from headless Edge, which runs the assertions for real:
+   ```bash
+   "/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" \
+     --headless --disable-gpu --virtual-time-budget=4000 \
+     --dump-dom "http://localhost:8080/_test.html"
+   ```
+4. Read the pass and fail lines out of the output.
+5. **Delete the harness.** It is not committed, because a test file with no runner to
+   invoke it is a file that silently rots.
+
+The same approach verifies a page end to end: append a script that clicks a button, dump
+the DOM, and read the rendered numbers out of it. That is how the Character Counter's
+sample-text figures in the checklist above were established rather than guessed.
+
+This is a deliberate compromise, not a test suite. It catches logic errors in a pure
+function at the moment of writing and leaves nothing behind to maintain. Anything
+involving real clipboard permissions, CORS, or visual layout still has to be checked by
+hand.
 
 ### What to update afterwards
 
@@ -1670,6 +1830,38 @@ code blocks, and no raw HTML passthrough. The last one is a deliberate safety de
 Syntax highlighting is absent because every good implementation is a third-party
 library, and this project does not use any.
 
+**What does the Character Counter count?**
+Characters with spaces, characters without spaces, words, sentences, paragraphs, and
+lines, plus an estimate of how long the text takes to read silently and to say aloud. It
+also shows how the text measures against six common limits: an X post, a single SMS, a
+search result meta description, a page title, an Instagram caption, and a LinkedIn post.
+
+**Why does its character count differ from another tool's?**
+Because "character" has two reasonable meanings and they only differ for emoji and some
+rarer scripts. This tool's main number counts the way platforms count when they enforce
+a limit, where an emoji is two. When your text contains such characters the page says so
+and shows both numbers, so you can use whichever one you need rather than guessing which
+one you are being given.
+
+**Is the sentence count exact?**
+No, and it is worth knowing why. It counts full stops, question marks, and exclamation
+marks followed by a space or the end of the text. Abbreviations like "e.g." or "Mr.
+Smith" will each add a sentence that is not there. Counting correctly needs a dictionary
+of abbreviations, which would mean adding a third-party library, so the tool reports an
+estimate rather than pretending to a precision it does not have.
+
+**Where do the reading and speaking times come from?**
+Reading time assumes 238 words per minute, the pooled average for adult silent reading of
+English prose from a 2019 meta-analysis. Speaking time assumes 130 words per minute, a
+typical pace for a prepared talk. Both are averages, so treat them as a guide rather than
+a stopwatch, and both assume English.
+
+**Does the Character Counter keep my text?**
+It saves your text to your own browser's storage so it is still there if you reload, the
+same way the Markdown Editor does. It is not encrypted and it stays until you clear your
+site data. It is never sent anywhere. Use the Clear button if you would rather it did not
+stay.
+
 **What tracking parameters does the Link Cleaner remove?**
 Around fifty by exact name plus eleven by prefix, covering all `utm_` variants,
 Facebook (`fbclid`), Google Ads (`gclid`, `wbraid`, `gbraid`), Microsoft (`msclkid`),
@@ -1720,7 +1912,7 @@ these targets are to mean anything.
 **What is the biggest risk?**
 The Google gstatic favicon service. It is undocumented, unauthenticated, and unversioned,
 and the Favicon Downloader has no fallback. If Google restricts or removes it, one of
-the three hosted tools stops working with no quick fix. The planned mitigation is a
+the four hosted tools stops working with no quick fix. The planned mitigation is a
 direct `/favicon.ico` fetch for domains that expose one.
 
 **What is the second biggest risk?**

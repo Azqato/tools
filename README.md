@@ -10,7 +10,7 @@ nothing to install or sign up for.
 
 ## What the site offers
 
-The site is a single landing page listing every tool, plus one page per tool. Three
+The site is a single landing page listing every tool, plus one page per tool. Four
 tools are built and hosted here. Four more are Azqato projects that live on their own
 sites and are linked from the same list, marked "external".
 
@@ -35,6 +35,14 @@ Paste a link that is cluttered with tracking codes, the `utm_source`, `fbclid`, 
 post, and get back a clean version you can share. The tool shows you exactly which
 parts it removed and which it kept, so you can check that nothing you needed was
 stripped out. The link never leaves your device; the cleaning happens in your browser.
+
+**Character Counter**
+Paste or type text and watch every number update as you go: characters with and without
+spaces, words, sentences, paragraphs, and lines, plus an estimate of how long the text
+takes to read silently and to say out loud. Underneath, a set of bars shows how the text
+measures against the limits people actually run into, an X post, a single SMS, a search
+result meta description, a page title, and Instagram and LinkedIn captions, so you can
+see at a glance how much room is left or how far over you are.
 
 ### Linked from here, hosted elsewhere
 
