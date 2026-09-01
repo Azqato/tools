@@ -10,7 +10,7 @@ nothing to install or sign up for.
 
 ## What the site offers
 
-The site is a single landing page listing every tool, plus one page per tool. Six
+The site is a single landing page listing every tool, plus one page per tool. Ten
 tools are built and hosted here. Four more are Azqato projects that live on their own
 sites and are linked from the same list, marked "external". A search box above the list
 filters it as you type.
@@ -61,6 +61,38 @@ every folder at once. If you already have a collection loaded, importing asks wh
 merge the two or replace what is there rather than deciding for you. The file never
 leaves your browser.
 
+**Base64 Encoder**
+Turn text into Base64 and back again. Base64 is the format that lets arbitrary text
+travel through systems that only expect plain letters and numbers, which is why it turns
+up in email attachments, data URLs, and configuration files. Accents, emoji, and non
+Latin scripts all survive the trip intact, which is where many other converters quietly
+mangle things. There is also a URL-safe variant for when the result has to sit inside a
+web address or a filename.
+
+**JSON Formatter**
+Paste JSON and get it laid out readably, squashed down to one line, or sorted by key.
+When the text will not parse, the tool tells you the line and column and shows you the
+offending line with a marker under the exact character, instead of reporting a position
+number you would have to count out by hand. Sorting reaches every level of nesting but
+deliberately leaves the order of lists alone, because the order of a list is part of what
+it says.
+
+**Password Generator**
+Make a strong random password, with control over length and which kinds of characters go
+in. The randomness comes from your operating system's own cryptographic source rather
+than a server, so the password is never transmitted and never exists anywhere but your
+screen. An estimate of its strength updates as you adjust the settings, and there is an
+option to leave out characters that are easy to confuse when reading a password aloud or
+off a printed page.
+
+**Timestamp Converter**
+Convert a Unix timestamp, the plain count of seconds computers use to record an instant,
+into a date you can actually read, or go the other way from a date and time you pick. It
+handles seconds, milliseconds, and microseconds, works out which one you probably meant
+from the size of the number, and always tells you what it assumed so you can correct it.
+You get the result in your own timezone and in UTC side by side, along with how long ago
+or how far ahead it is.
+
 ### Linked from here, hosted elsewhere
 
 **Nasdaq 100 Screener** - grades every company in the Nasdaq 100 against the Azqato
@@ -82,19 +114,20 @@ exports to Excel. Like the tools on this site, it keeps your data on your device
 
 Anyone who needs a quick utility and does not want to hand their text or their links
 to a website they have no reason to trust. That includes developers checking how a
-README will render, writers drafting in Markdown, marketers cleaning up campaign
-links before sharing them, and designers collecting icons. It also serves readers who
-already follow Azqato's financial tools and want them collected in one place.
+README will render or making sense of a JSON file that will not parse, writers drafting
+in Markdown, marketers cleaning up campaign links before sharing them, and designers
+collecting icons. It also serves readers who already follow Azqato's financial tools and
+want them collected in one place.
 
-No account is required, nothing costs anything, and the Markdown Editor and Link
-Cleaner keep working with the network switched off. The Favicon Downloader is the one
-exception: it needs a connection, because it asks a public icon service for the images.
+No account is required, nothing costs anything, and every tool but one keeps working
+with the network switched off. The Favicon Downloader is the exception: it needs a
+connection, because it asks a public icon service for the images.
 
 ---
 
 ## Current status
 
-Live, stable, and actively developed. Six in-browser tools are finished and working,
+Live, stable, and actively developed. Ten in-browser tools are finished and working,
 and new ones are added when they can meet the same standard: useful, fast, and doing all
 their work on your device rather than someone's server. The site has had a full
 accessibility pass, so every page can be navigated by keyboard alone, works with a screen

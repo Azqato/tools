@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timestamp Converter - Azqato's Tools</title>
+  <meta name="description" content="Convert Unix timestamps to readable dates and back, in seconds, milliseconds or microseconds. Runs entirely in your browser." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
+      <div class="spacer"></div>
+      <a class="nav-link hide-sm" href="https://azqato.com/">Azqato</a>
+      <a class="nav-link hide-sm" href="https://azqato.com/projects">Projects</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/tools/">Tools</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/support.html">Support</a>
+      <button class="icon-btn nav-toggle" id="nav-toggle" aria-label="Menu"
+              aria-expanded="false" aria-controls="nav-menu">
+        <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+    <nav class="nav-menu" id="nav-menu" aria-label="Site" hidden>
+      <a href="https://azqato.com/">Azqato</a>
+      <a href="https://azqato.com/projects">Projects</a>
+      <a href="https://azqato.github.io/tools/">Tools</a>
+      <a href="https://azqato.github.io/support.html">Support</a>
+    </nav>
+  </header>
+
+  <main id="main" class="page wrap">
+    <div class="page-head">
+      <div class="crumb"><a href="index.html">Tools</a> / Timestamp Converter</div>
+      <h1>Timestamp Converter</h1>
+      <p>Convert a Unix timestamp to a readable date, or a date to a timestamp. The unit is guessed from the size of the number and the guess is always shown.</p>
+    </div>
+
+    <div class="tc-inputs">
+      <div class="tc-field">
+        <label class="lbl" for="tc-number">Unix timestamp</label>
+        <div class="input-row">
+          <input id="tc-number" class="field" type="text" inputmode="numeric"
+                 autocomplete="off" placeholder="e.g. 1756600000" />
+          <select id="tc-unit" class="field tc-unit" aria-label="Unit">
+            <option value="auto" selected>Auto</option>
+            <option value="s">Seconds</option>
+            <option value="ms">Milliseconds</option>
+            <option value="us">Microseconds</option>
+          </select>
+          <button class="btn" id="tc-now">Now</button>
+        </div>
+      </div>
+
+      <div class="tc-field">
+        <label class="lbl" for="tc-date">Or pick a date and time</label>
+        <input id="tc-date" class="field" type="datetime-local" step="1" />
+      </div>
+    </div>
+
+    <p class="tc-error" id="tc-error" role="alert" hidden></p>
+
+    <div class="tc-results" id="tc-results" hidden>
+      <p class="tc-guess" id="tc-guess" role="status"></p>
+      <dl class="tc-grid" id="tc-grid"></dl>
+    </div>
+
+    <p class="ws-note">A bare integer does not say what unit it is in, so the size of the
+      number decides: ten digits is read as seconds and thirteen as milliseconds. The
+      reading is always shown, and the dropdown overrides it. Local times use this
+      device's timezone, which is what the picker means when you type into it.</p>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© <span class="year"></span> Azqato's Tools</span>
+      <div class="spacer"></div>
+      <a href="index.html">Home</a>
+      <span style="color:var(--text-faint)">Conversion happens on your device</span>
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script src="js/timestampconverter.js"></script>
+  <script>
+    var numEl = document.getElementById("tc-number");
+    var unitEl = document.getElementById("tc-unit");
+    var dateEl = document.getElementById("tc-date");
+    var errEl = document.getElementById("tc-error");
+    var resultsEl = document.getElementById("tc-results");
+    var guessEl = document.getElementById("tc-guess");
+    var gridEl = document.getElementById("tc-grid");
+
+    var UNIT_NAME = { s: "seconds", ms: "milliseconds", us: "microseconds" };
+
+    var ROWS = [
+      ["Relative", "relative"],
+      ["Local time", "local"],
+      ["UTC", "utc"],
+      ["ISO 8601", "iso"],
+      ["Seconds", "seconds"],
+      ["Milliseconds", "millis"]
+    ];
+
+    function fail(message) {
+      resultsEl.hidden = true;
+      errEl.textContent = message;
+      errEl.hidden = false;
+    }
+
+    function show(res) {
+      if (!res.ok) { fail(res.error); return; }
+      errEl.hidden = true;
+      guessEl.textContent = res.guessed
+        ? "Read as " + UNIT_NAME[res.unit] + ". Change the unit if that is wrong."
+        : "Read as " + UNIT_NAME[res.unit] + ".";
+
+      gridEl.textContent = "";
+      ROWS.forEach(function (row) {
+        var dt = document.createElement("dt");
+        dt.textContent = row[0];
+        var dd = document.createElement("dd");
+        var val = String(res[row[1]]);
+        var span = document.createElement("span");
+        span.textContent = row[1] === "local" ? val + " (" + res.offset + ")" : val;
+        dd.appendChild(span);
+        var btn = document.createElement("button");
+        btn.className = "btn sm ghost";
+        btn.textContent = "Copy";
+        btn.addEventListener("click", function () { copyText(val, row[0] + " copied"); });
+        dd.appendChild(btn);
+        gridEl.appendChild(dt);
+        gridEl.appendChild(dd);
+      });
+      resultsEl.hidden = false;
+    }
+
+    function fromNumber() {
+      if (!numEl.value.trim()) {
+        resultsEl.hidden = true;
+        errEl.hidden = true;
+        return;
+      }
+      show(timestampConverter.fromNumber(numEl.value, unitEl.value));
+    }
+
+    numEl.addEventListener("input", function () { dateEl.value = ""; fromNumber(); });
+    unitEl.addEventListener("change", fromNumber);
+
+    dateEl.addEventListener("input", function () {
+      if (!dateEl.value) return;
+      var res = timestampConverter.fromLocalInput(dateEl.value);
+      if (res.ok) {
+        // Writing the seconds back into the number box keeps one visible source
+        // of truth, so the two inputs can never disagree on screen.
+        numEl.value = String(res.seconds);
+        unitEl.value = "s";
+      }
+      show(res);
+    });
+
+    document.getElementById("tc-now").addEventListener("click", function () {
+      var res = timestampConverter.now();
+      numEl.value = String(res.seconds);
+      unitEl.value = "s";
+      dateEl.value = "";
+      fromNumber();
+    });
+  </script>
+</body>
+</html>

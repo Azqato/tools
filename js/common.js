@@ -101,4 +101,16 @@
       document.body.removeChild(ta);
     }
   };
+  /* --- Footer year --------------------------------------------------------
+     Chrome behaviour, so it belongs here rather than in eight inline copies.
+     It was eight copies until v1.4.0, and the copies had already drifted: the
+     landing page used #year while every tool page used .year. Four pages added
+     in v1.4.0 carried the markup without the script and rendered a blank year,
+     which is what prompted the move. Both selectors are honoured so no page
+     needs its markup changed, and a page with neither is simply unaffected. */
+  var years = document.querySelectorAll(".year, #year");
+  if (years.length) {
+    var now = String(new Date().getFullYear());
+    for (var yi = 0; yi < years.length; yi++) years[yi].textContent = now;
+  }
 })();

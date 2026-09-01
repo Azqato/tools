@@ -120,6 +120,42 @@
           <span class="go">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </a>
 
+        <a class="tool-card" href="base64-encoder.html">
+          <span class="ticon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6 3 12l5 6M16 6l5 6-5 6M13 4l-2 16"/></svg>
+          </span>
+          <h3>Base64 Encoder</h3>
+          <p>Encode text to Base64 and decode it back, with accents, emoji and CJK all surviving the round trip. Includes the URL-safe alphabet.</p>
+          <span class="go">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tool-card" href="json-formatter.html">
+          <span class="ticon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/></svg>
+          </span>
+          <h3>JSON Formatter</h3>
+          <p>Format, minify or sort JSON by key. When it will not parse you get the line, the column and the offending line, not just a character offset.</p>
+          <span class="go">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tool-card" href="password-generator.html">
+          <span class="ticon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 15v2"/></svg>
+          </span>
+          <h3>Password Generator</h3>
+          <p>Generate a strong random password using your operating system's cryptographic randomness, with an entropy estimate and a look-alike character filter.</p>
+          <span class="go">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
+        <a class="tool-card" href="timestamp-converter.html">
+          <span class="ticon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </span>
+          <h3>Timestamp Converter</h3>
+          <p>Convert a Unix timestamp to a readable date or back again, in seconds, milliseconds or microseconds, with the unit guess always shown.</p>
+          <span class="go">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+
         <a class="tool-card" href="https://azqato.github.io/stocks/screener.html" target="_blank" rel="noopener">
           <span class="ticon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
@@ -157,7 +193,7 @@
         </a>
 
         <p class="tools-empty" id="tools-empty" hidden>No tool matches that. Try a
-          shorter word, or clear the box to see all ten.</p>
+          shorter word, or clear the box to see all fourteen.</p>
       </div>
     </section>
 
@@ -188,7 +224,6 @@
   </footer>
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
 
     // --- Tool search -------------------------------------------------------
     // Deferred until the grid held eight cards, which it now does. Matching is

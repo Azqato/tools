@@ -1,8 +1,8 @@
 # Design System - Azqato's Tools
 
-**Last verified against the code:** 2026-08-31 for v1.3.0 (`css/style.css`, 1024 lines, ~26.4KB)
+**Last verified against the code:** 2026-08-31 for v1.4.0 (`css/style.css`, 1273 lines, ~32.2KB)
 
-Every value in this document was read out of `css/style.css` or the five HTML pages
+Every value in this document was read out of `css/style.css` or the eleven HTML pages
 rather than inferred. Where the code and an earlier version of this document
 disagreed, both readings are kept and the conflict is marked as a discrepancy for the
 author to resolve rather than silently corrected.
@@ -104,11 +104,11 @@ declared once on `:root` and shared by both themes.
 | `color-mix(in srgb, var(--danger) 14%, transparent)` | Removed-param chip background |
 | `color-mix(in srgb, var(--danger) 30%, transparent)` | Removed-param chip border |
 | `#fff` | Text on `.btn.primary` and on the logo mark, in both themes |
-| `#5b5bf0` | Favicon data URI background on all five pages, hardcoded in the `<link rel="icon">` SVG, equal to the light-theme `--accent` |
+| `#5b5bf0` | Favicon data URI background on all eleven pages, hardcoded in the `<link rel="icon">` SVG, equal to the light-theme `--accent` |
 
 The favicon hex is the one place a token value is duplicated as a literal. It cannot
 reference a custom property because it lives inside a data URI in `<head>`. If
-`--accent` changes, the favicon in all five HTML files must be changed by hand.
+`--accent` changes, the favicon in all eleven HTML files must be changed by hand.
 
 ---
 
@@ -328,7 +328,7 @@ contains several `<section class="wrap">` blocks (hero, tools, about).
 - Bottom border in `--border`
 - Contents in order: brand (logo mark plus wordmark), `.spacer`, four nav links, theme
   toggle icon button
-- Nav links, identical on all five pages: Azqato (`https://azqato.com/`), Projects
+- Nav links, identical on all eleven pages: Azqato (`https://azqato.com/`), Projects
   (`https://azqato.com/projects`), Tools (`https://azqato.github.io/tools/`), Support
   (`https://azqato.github.io/support.html`)
 - The Tools link points at the deployed site rather than at the relative `index.html`,
@@ -461,6 +461,15 @@ Toast is the only feedback channel in the project. There is no inline error text
 modal, and no banner component. Validation failures, clipboard failures, and success
 confirmations all speak through it. A new tool should not invent a second feedback
 pattern without a reason recorded in `PATCHNOTES.md`.
+
+> **Amended in v1.3.0 and v1.4.0, with the reason recorded as this paragraph requires.**
+> Two further channels now exist. v1.3.0 added a `<dialog>` for the import fork, and
+> v1.4.0 added the inline error banner, documented under "Inline error banners" below.
+> The original sentence is left standing because the instinct behind it is still right:
+> **the bar for a new channel is high, and it is cleared by argument, not by
+> convenience.** The current division is that toast reports events, a banner reports a
+> state the user must act on, and a dialog is reserved for a genuine fork where no
+> default is safe. A fourth channel needs the same kind of argument these two made.
 
 > **Closed in v1.0.0.** The toast now carries `role="status"`, set in `common.js` at the
 > point the element is created rather than in markup, so all five pages inherit it from
@@ -669,6 +678,105 @@ information, not a mistake, so there is no icon, no toast, and no blocked action
 reuse `.cc-bar` and `.cc-fill` rather than inventing a variant, and the classes should
 be renamed away from the `cc-` prefix at that point.
 
+### Split panes
+
+`.b64-panes` and `.jf-panes` are the same pattern: a two-column `1fr 1fr` grid with an
+18px gap, input on the left and read-only output on the right, collapsing to one column
+at 760px. Both panes carry `min-width: 0`, without which a long unbroken string forces
+the grid wider than the viewport instead of scrolling inside its own column.
+
+The two differ in one deliberate way. Base64 output uses `word-break: break-all`, because
+a Base64 string has no meaningful line structure and wrapping it anywhere is fine. JSON
+output uses `white-space: pre` with `overflow-x: auto`, because indentation is the entire
+point of the output and re-wrapping it would destroy what the user asked for.
+
+This is a third pane layout alongside `.md-split`. It was not merged with it: `.md-split`
+is a live editor and preview with a shared minimum height and its own mobile behaviour,
+while these are a transform and its result. Merging them would produce a component with
+two modes and no clear name.
+
+### Read-only output panes
+
+An output pane is a real `<textarea readonly>`, not a `<div>`. It keeps native text
+selection, keyboard scrolling, and the platform's own select-all behaviour, all of which
+a styled `<div>` would have to reimplement. Because a `readonly` textarea is still a form
+control, it needs an accessible name, and there is no `<label>` to give it: a label names
+a control the user edits. The pattern is `<p class="lbl" id="x-output-label">` plus
+`aria-labelledby` on the textarea, which is the same reasoning that loosened `label.lbl`
+to `.lbl` in v1.0.0.
+
+### Inline error banners
+
+`.b64-error`, `.jf-error`, and `.tc-error` are one pattern: `--bg-elev` background, a 1px
+`--danger` border, `--radius-sm`, `12px 14px` padding, `--danger` text at `0.9rem`. Each
+carries `role="alert"` and is toggled with the `hidden` attribute.
+
+**This is the first deliberate exception to "toast is the only feedback channel."** The
+rule holds for events, things that happened and are then over: a copy succeeded, a record
+was removed. It does not hold for a persistent state the user is trying to fix. A parse
+error must stay on screen while they edit, must be readable next to the input it refers
+to, and must be re-readable. A toast that vanishes after 1900ms is the wrong shape for
+that, and making the toast persistent would make it the wrong shape for everything else.
+
+The rule for anyone adding a third channel: **toast for events, inline banner for a state
+the user must act on.** If the message answers "what just happened", it is a toast. If it
+answers "what is wrong right now", it is a banner.
+
+`.jf-error` adds a second element, `.jf-error-line`, showing the offending source line
+with a caret beneath the failing column. It must be `var(--mono)` and `white-space: pre`:
+the caret only lines up if every glyph is the same width and the line is not re-wrapped,
+so this block cannot inherit the page font and cannot be allowed to wrap.
+
+### Option rows
+
+`.b64-opt` is the inline label used for checkboxes and small selects across the Base64
+Encoder, JSON Formatter, and Password Generator: `inline-flex`, 7px gap, `0.88rem`,
+`--text-soft`. A nested `<code>` drops to `0.82rem` `--text-faint` for a character-set
+hint such as `a-z`.
+
+It keeps the `.b64-` prefix although three tools use it, because that is where it was
+first needed and renaming it would touch four files to no visible end. **If a fourth tool
+needs it, rename it then**, to `.opt-row`, and take the four edits.
+
+One trap this pattern hides. A `<label for="x">` that also *wraps* the control absorbs the
+control's own text into its accessible name; for a `<select>` that means every option ends
+up in the name. Wrap **or** point, never both. The audit harness checks this.
+
+### Value display
+
+`.pg-value` is the generated-password readout: an `<output>` element, `var(--mono)` at
+`1.15rem`, `word-break: break-all`, inside a `.card`-styled row with a refresh icon
+button. `<output>` rather than a `<div>` because it is a live region by default, which is
+exactly right for a value the page recomputes on every settings change.
+
+Its `for` attribute lists every control that fed the value, not just the first.
+
+`.pg-value.empty` uses a `::before` with generated content for the "no character set
+selected" state, so the empty case needs no extra element and no JavaScript branch beyond
+a class toggle.
+
+### Meter bars
+
+`.pg-bar` and `.pg-fill` reuse the `.cc-limit` idea from the Character Counter, a 6px
+fully-rounded `--bg-inset` track with a width-animated fill, but the fill is colored by
+level rather than by an over-limit flag: `--danger`, amber `#d98a1f`, `--success`, then
+`--accent` for the top two bands.
+
+**Color is never the only signal.** The `.pg-strength` line beneath states the label in
+words and carries `role="status"`, so the meter is decorative reinforcement. A user who
+cannot distinguish the colors loses nothing.
+
+### Definition grids
+
+`.tc-grid` is the Timestamp Converter's result table, built as a `<dl>` on a
+`max-content 1fr` grid rather than as a `<table>`. Each row is a term and its value, which
+is what a description list is for; a `<table>` would be claiming a two-dimensional
+relationship that is not there. Separation is by row border, never row background,
+following the rule set with `.ws-table`.
+
+At 760px it becomes a single column, and the first-row border reset has to be undone as
+well as applied, because a `dt` that was beside its `dd` is now above it.
+
 ### Footers
 
 There are two footer variants and they are not interchangeable.
@@ -676,7 +784,7 @@ There are two footer variants and they are not interchangeable.
 **Landing page footer** (`index.html`): copyright with a JS-injected year, spacer, then
 four links mirroring the topbar (Azqato, Projects, Tools, Support).
 
-**Tool page footer** (all four tool pages): copyright with a JS-injected year, spacer,
+**Tool page footer** (all ten tool pages): copyright with a JS-injected year, spacer,
 a "Home" link back to `index.html`, and a faint one-line reassurance specific to the
 tool:
 
@@ -724,7 +832,7 @@ one.
 - Every interactive element is a native `<button>`, `<a>`, `<input>`, or `<textarea>`.
   There are no div-based controls anywhere in the project, so tab order and activation
   behaviour come free from the browser.
-- Tab order follows DOM order on all five pages, which matches visual order.
+- Tab order follows DOM order on all eleven pages, which matches visual order.
 - `.field:focus` removes the native outline and substitutes a 3px `--accent-soft` ring.
   A color-only ring is a weaker indicator than the outline it replaces.
 - Buttons and links do **not** suppress the native focus ring. Only `.field` and
@@ -758,7 +866,7 @@ accessibility pass. They are kept here rather than deleted, because the record o
 was wrong is the reason the rules that replaced them exist.
 
 1. ~~No skip-to-main-content link on any page.~~ Closed. `.skip-link` is the first
-   focusable element on all five pages, off-screen until focused, targeting `#main`.
+   focusable element on all eleven pages, off-screen until focused, targeting `#main`.
 2. ~~No ARIA live region on the Markdown preview pane.~~ Closed, but **not** by adding
    `aria-live`, which would have been the wrong fix. See the note below.
 3. ~~No `role="status"` on the toast.~~ Closed in `common.js`.

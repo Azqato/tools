@@ -160,24 +160,39 @@ scope by definition.
 | Link Cleaner: 47 exact-name and 11 prefix tracking rules, removed and kept chips, copy, open, paste from clipboard, Ctrl+Enter shortcut | v0.1.0 | `link-cleaner.html`, `js/linkcleaner.js` |
 | External tool cards with `external` badge and diagonal arrow | v0.1.1 | `index.html` |
 | Responsive layout, two breakpoints | v0.1.0 | `css/style.css` |
-| Site-wide navigation shared with other Azqato properties | v0.1.5 | all five pages |
+| Site-wide navigation shared with other Azqato properties | v0.1.5 | all eleven pages |
 | Protein Tracker external card | v0.1.7 | `index.html` |
 | Character Counter: live character, word, sentence, paragraph and line counts, reading and speaking time estimates, six platform limit bars, draft autosave, copy stats | v0.2.0 | `character-counter.html`, `js/charactercounter.js` |
 | Wash Sale Tracker: ticker and trade date entry, 30 day window counted forward, active and expired tables, days-remaining urgency pill, per-row remove, clear expired behind a confirm, versioned collection storage | v1.2.0 | `wash-sale-tracker.html`, `js/washsale.js` |
 | Bookmark Manager: Netscape format import and export with folders preserved, edit in place, add bookmark and folder, delete, search across all folders, merge or replace on import, protocol whitelist on stored URLs | v1.3.0 | `bookmark-manager.html`, `js/bookmarks.js` |
+| Base64 Encoder: encode and decode with full Unicode via TextEncoder, URL-safe alphabet on output and accepted on input, byte and character counts, swap result into input | v1.4.0 | `base64-encoder.html`, `js/base64encoder.js` |
+| JSON Formatter: format, minify and deep key sort, selectable indent, parse errors located to line and column with a caret under the offending character, document statistics | v1.4.0 | `json-formatter.html`, `js/jsonformatter.js` |
+| Password Generator: four character sets, look-alike filter, length 4 to 128, `crypto.getRandomValues` with rejection sampling, live entropy and strength meter | v1.4.0 | `password-generator.html`, `js/passwordgenerator.js` |
+| Timestamp Converter: seconds, milliseconds and microseconds with magnitude-based unit detection and a manual override, local and UTC output, relative phrasing, per-row copy | v1.4.0 | `timestamp-converter.html`, `js/timestampconverter.js` |
 
 ### Future, post-launch, unordered
 
 Tool candidates, all of which must be buildable with zero dependencies:
 
 - **Color picker and converter**: pick a color, convert between hex, rgb, hsl, oklch
-- **Base64 encoder and decoder**: encode text or files, decode base64 strings
-- **JSON formatter**: paste minified JSON, get pretty-printed output with a tree view
-- **Password generator**: configurable length, character sets, entropy display
+- ~~**Base64 encoder and decoder**: encode text or files, decode base64 strings.~~
+  **Shipped in v1.4.0**, text only. Encoding a *file* was not built and is not
+  scheduled: it needs a drop target, a size ceiling, and a decision about what a
+  decoded binary should do in a text box, none of which the quick win covered.
+- ~~**JSON formatter**: paste minified JSON, get pretty-printed output with a tree
+  view.~~ **Shipped in v1.4.0** without the tree view. The error locator was worth
+  more than a tree and took the budget; a collapsible tree remains a candidate.
+- ~~**Password generator**: configurable length, character sets, entropy display.~~
+  **Shipped in v1.4.0**, all three.
 - **Image compressor**: client-side compression through the Canvas API, no upload
 - **Diff tool**: paste two text blocks, see a line-by-line diff
 - **QR code generator**: URL or text to QR, download as PNG or SVG
-- **Timestamp converter**: Unix epoch to human-readable, any timezone
+- ~~**Timestamp converter**: Unix epoch to human-readable, any timezone.~~
+  **Shipped in v1.4.0** for local time and UTC only. "Any timezone" was dropped
+  deliberately: a timezone picker needs the IANA database, and while
+  `Intl.DateTimeFormat` can reach it without a dependency, presenting 400 zones is a
+  different tool from the one being built. Recorded here rather than silently
+  narrowed.
 
 Platform work:
 
@@ -335,6 +350,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 | v1.1.0 - Platform: mobile navigation and tool search | 2026-08-31 | Complete |
 | v1.2.0 - Wash Sale Tracker | 2026-08-31 | Complete |
 | v1.3.0 - Bookmark Manager | 2026-08-31 | Complete |
+| v1.4.0 - Small tools batch, four Future items | 2026-08-31 | Complete |
 
 > **Resolved in v1.0.0.** This table used to carry a row reading "v1.0.0 - Public
 > deployment to GitHub Pages, Complete" while the changelog was still at v0.1.x, so the
@@ -359,7 +375,47 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
   spaces, words, sentences, paragraphs, and lines, plus reading and speaking time
   estimates and six platform limit bars
 - One or two further tools from the Future list, exact tools not yet chosen
-- Landing page copy revisit once the grid exceeds eight cards
+- Landing page copy revisit once the grid exceeds eight cards. **Overdue:** the grid
+  reached fourteen cards in v1.4.0 and the copy has not been revisited
+
+### v1.4.0 Small tools batch, complete 2026-08-31
+
+Four tools from the Future list in one release. They are grouped rather than given a
+milestone each because each is small, none introduces a new storage key, and all four
+share one shape: a pure module that transforms an input, plus a page that wires it to
+the DOM. Grouping them keeps the milestone list honest about their size.
+
+**Scope:**
+
+- Base64 Encoder, JSON Formatter, Password Generator, Timestamp Converter
+- Four `.tool-card` entries taking the landing grid from ten to fourteen
+- Four new CSS sections and one shared option-row class
+
+**Decisions recorded:**
+
+- **The JSON error locator scans the text rather than reading the engine's error
+  message.** This was the release's one genuine reversal. The first implementation
+  matched three regexes against `SyntaxError.message` to recover a character offset. All
+  three missed, because V8's current wording for the most common failure is
+  `Unexpected token '}', ..."b": }..." is not valid JSON`, which carries a context
+  snippet and no offset at all, and because `Unexpected end of JSON input` has never
+  carried one in any version. Error strings are not an API. A recursive descent scanner
+  over RFC 8259 is about a hundred lines, is correct on every engine and every version,
+  and locates the cases the engine never located, so it is the cheaper thing to own. The
+  engine's wording is still shown, because it is better prose than a reimplementation:
+  wording from the engine, position from the scanner.
+- **The footer year setter moved into `js/common.js`.** It had been copy-pasted into
+  eight inline scripts and had already drifted, the landing page using `#year` while
+  every tool page used `.year`. This was found because the four new pages carried the
+  markup without the script and rendered a blank year. Chrome behaviour belongs in the
+  shared file, which is the same argument v1.1.0 made for the mobile navigation.
+- **"Any timezone" was dropped from the Timestamp Converter** rather than quietly
+  narrowed. See the Future list entry for the reasoning.
+- **File encoding was not added to the Base64 Encoder.** See the Future list entry.
+
+**Not in scope:** a JSON tree view, file input on the Base64 Encoder, a timezone picker,
+and passphrase (word list) generation, which would need a dictionary and therefore a
+dependency.
 
 ### v1.3.0 Bookmark Manager, complete 2026-08-31
 
@@ -521,7 +577,7 @@ v1.0.0 rather than v0.2.1.
   that it wins over every transition declared above it, with durations set to 1ms rather
   than 0 so `transitionend` still fires and nothing waiting on it is left hanging
 - Skip-to-content link on all pages. Done. `.skip-link` is the first focusable element
-  on all five pages, positioned off-screen until focused, targeting `#main`
+  on all eleven pages, positioned off-screen until focused, targeting `#main`
 - `role="status"` on the toast. Done, in `js/common.js` at the point the element is
   created, so every page gets it without repeating the attribute in five files
 - Labels for the unlabelled inputs. Done. `#fav-input` and `#md-input` now carry
@@ -617,24 +673,45 @@ is not the outcome the project exists for.
 
 Measured page weights as of 2026-08-31:
 
+Measured at v1.4.0, 2026-08-31.
+
 | File | Bytes |
 |------|-------|
-| `index.html` | 11,035 |
-| `css/style.css` | 16,594 |
-| `js/common.js` | 2,020 |
+| `index.html` | 18,664 |
+| `css/style.css` | 32,931 |
+| `js/common.js` | 4,293 |
 | `js/markdown.js` | 6,984 |
-| `js/linkcleaner.js` | 2,246 |
+| `js/linkcleaner.js` | 2,238 |
 | `js/charactercounter.js` | 2,319 |
-| `markdown-preview.html` | 7,311 |
-| `favicon-downloader.html` | 6,784 |
-| `link-cleaner.html` | 6,264 |
-| `character-counter.html` | 9,168 |
+| `js/washsale.js` | 3,993 |
+| `js/bookmarks.js` | 6,981 |
+| `js/base64encoder.js` | 2,720 |
+| `js/jsonformatter.js` | 7,977 |
+| `js/passwordgenerator.js` | 2,918 |
+| `js/timestampconverter.js` | 5,252 |
+| `markdown-preview.html` | 8,160 |
+| `favicon-downloader.html` | 7,589 |
+| `link-cleaner.html` | 6,991 |
+| `character-counter.html` | 9,907 |
+| `wash-sale-tracker.html` | 12,349 |
+| `bookmark-manager.html` | 17,485 |
+| `base64-encoder.html` | 8,289 |
+| `json-formatter.html` | 7,750 |
+| `password-generator.html` | 7,850 |
+| `timestamp-converter.html` | 7,751 |
 
-Landing page total (`index.html` plus `style.css` plus `common.js`): 29,649 bytes.
-Heaviest single page (Markdown Editor: HTML plus CSS plus `common.js` plus
-`markdown.js`): 32,909 bytes. The Character Counter is 30,101 bytes. All are
-comfortably inside the 100KB target, though note that `style.css` is shared and grows
-with every tool, so it is the figure to watch as the grid fills out.
+Landing page total (`index.html` plus `style.css` plus `common.js`): 55,888 bytes.
+Heaviest single page (Bookmark Manager: HTML plus CSS plus `common.js` plus
+`bookmarks.js`): 61,690 bytes. All are inside the 100KB target.
+
+**The number to watch is `css/style.css`, which has doubled since the last measurement**,
+from 16,594 bytes to 32,931. It is shared, so every tool pays for every other tool's
+section, and it is now more than half the weight of a cold page load. The previous
+measurement already named it as the figure to watch and it has behaved exactly as
+predicted. At the current rate roughly four more tools would put a cold load at the
+100KB target on the CSS alone. Nothing is broken yet and no action is taken here, but
+the next tool batch should either split the per-tool sections out or accept the target
+moving, and that should be a decision rather than a drift.
 
 ### Reporting cadence
 
@@ -790,11 +867,19 @@ serverless function, and no API owned by this project.
 ```
 User's browser
   └── loads static files from GitHub Pages (or the local filesystem)
-        ├── css/style.css        design system, loaded by all five pages
-        ├── js/common.js         theme, toast, clipboard. Loaded by all five pages
+        ├── css/style.css        design system, loaded by all eleven pages
+        ├── js/common.js         theme, toast, clipboard, nav, footer year.
+        │                        Loaded by all eleven pages
         ├── js/markdown.js       Markdown parser. Markdown Editor only
         ├── js/linkcleaner.js    URL param stripper. Link Cleaner only
         ├── js/charactercounter.js  Text statistics. Character Counter only
+        ├── js/washsale.js       UTC date arithmetic. Wash Sale Tracker only
+        ├── js/bookmarks.js      Netscape format parser. Bookmark Manager only
+        ├── js/base64encoder.js  Unicode-safe Base64. Base64 Encoder only
+        ├── js/jsonformatter.js  JSON parse, reshape, and error locator.
+        │                        JSON Formatter only
+        ├── js/passwordgenerator.js  CSPRNG password builder. Password Generator only
+        ├── js/timestampconverter.js  Instant conversion. Timestamp Converter only
         └── inline <script>      per-page glue code, at the end of each tool page
 ```
 
@@ -840,13 +925,26 @@ See Conventions.
 ├── favicon-downloader.html     Favicon Downloader tool page
 ├── link-cleaner.html           Link Cleaner tool page
 ├── character-counter.html      Character Counter tool page
+├── wash-sale-tracker.html      Wash Sale Tracker tool page
+├── bookmark-manager.html       Bookmark Manager tool page
+├── base64-encoder.html         Base64 Encoder tool page
+├── json-formatter.html         JSON Formatter tool page
+├── password-generator.html     Password Generator tool page
+├── timestamp-converter.html    Timestamp Converter tool page
 ├── css/
 │   └── style.css               The entire design system. Every page loads this
 ├── js/
-│   ├── common.js               Theme toggle, toast, copyText. Loaded by every page
+│   ├── common.js               Theme, toast, copyText, mobile nav, footer year.
+│   │                           Loaded by every page
 │   ├── markdown.js             Self-contained Markdown to HTML parser
 │   ├── linkcleaner.js          Tracking-parameter detection and removal
-│   └── charactercounter.js     Text statistics and duration formatting
+│   ├── charactercounter.js     Text statistics and duration formatting
+│   ├── washsale.js             UTC date arithmetic and window classification
+│   ├── bookmarks.js            Netscape bookmark format parse, serialize, merge
+│   ├── base64encoder.js        Unicode-safe Base64 encode and decode
+│   ├── jsonformatter.js        JSON reshaping plus an RFC 8259 error locator
+│   ├── passwordgenerator.js    Password construction, entropy, strength
+│   └── timestampconverter.js   Unix instant to representations and back
 └── docs/
     ├── PRD.md                  This file
     ├── DESIGN.md               Visual system, component rules, accessibility
@@ -1081,6 +1179,103 @@ only `a-z0-9.-`), single-label hosts, `localhost`, raw IP addresses, and any TLD
 character. Punycode (`xn--`) forms pass, so an IDN works if the user pastes the encoded
 form.
 
+**`js/washsale.js`** attaches one global, `window.washSale`. Dates are handled as
+`YYYY-MM-DD` strings throughout and every arithmetic operation goes through `Date.UTC`,
+so neither the local timezone nor a daylight-saving transition can move a boundary. The
+one exception is `today()`, which must read local getters because "today" is a local
+question:
+
+| Function | Parameters | Returns | Behaviour |
+|----------|-----------|---------|-----------|
+| `WINDOW_DAYS` | constant | `30` | The wash sale window in days |
+| `isValidDate(iso)` | `iso: string` | `boolean` | True only if the string is `YYYY-MM-DD` **and** survives a round trip through the epoch, which rejects `2026-02-30` and similar calendar-shaped non-dates |
+| `addDays(iso, n)` | `iso: string`, `n: number` | ISO string | UTC day arithmetic |
+| `daysBetween(a, b)` | `a: string`, `b: string` | `number` | Whole days from `a` to `b`, negative if `b` is earlier |
+| `today()` | none | ISO string | The local calendar date |
+| `expiryOf(tradeDate)` | `tradeDate: string` | ISO string | `addDays(tradeDate, 30)` |
+| `normalizeTicker(raw)` | `raw: string` | `string` | Strips anything outside `A-Z0-9.-`, uppercases, truncates to 12 characters |
+| `classify(records, ref)` | `records: array`, `ref: string` optional | `{ active, expired }` | Splits on `ref` (default today). A record is active while `daysLeft >= 0`, so the expiry date itself is still inside the window. Active sorts soonest first, expired most recent first |
+
+**`js/bookmarks.js`** attaches one global, `window.bookmarks`. It never touches the live
+document; `parse` builds its own detached document through `DOMParser`:
+
+| Function | Parameters | Returns | Behaviour |
+|----------|-----------|---------|-----------|
+| `parse(html)` | `html: string` | `array` of items | Parses the Netscape bookmark format. Handles both real-world nestings: Chrome puts a folder's `<DL>` inside the `<DT>` that names it, Firefox puts it after as a sibling. Malformed and empty input returns `[]` rather than throwing |
+| `serialize(items)` | `items: array` | `string` | Writes the same format back, with the `<!DOCTYPE NETSCAPE-Bookmark-file-1>` header and four-space indent per level |
+| `count(items)` | `items: array` | `{ links, folders }` | Recursive totals |
+| `flatten(items)` | `items: array` | `array` | Every link with its folder path, used by search |
+| `remove(items, id)` | `items: array`, `id: string` | `boolean` | Removes a link or a whole folder in place. False if the id was not found |
+| `merge(existing, incoming)` | two arrays | `array` | Folds folders together by name and skips a duplicate URL **within the same folder**. The same link filed in two folders is two bookmarks to a user, so it is not deduplicated globally |
+| `isSafe(url)` | `url: string` | `boolean` | Protocol whitelist. An unsafe URL is still stored, so import stays lossless, but the page never gives it a live `href` |
+| `nextId()` | none | `string` | Collision-resistant id from the clock plus a sequence counter |
+
+An item is `{ type: "link", id, name, url, add }` or
+`{ type: "folder", id, name, children, add, open }`.
+
+**`js/base64encoder.js`** attaches one global, `window.base64Encoder`. Everything goes
+through `TextEncoder` and `TextDecoder` rather than `btoa`/`atob` alone, because those
+two operate on binary strings and `btoa("é")` throws:
+
+| Function | Parameters | Returns | Behaviour |
+|----------|-----------|---------|-----------|
+| `encode(text, urlSafe)` | `text: string`, `urlSafe: boolean` | `string` | UTF-8 encodes, then Base64. With `urlSafe`, applies RFC 4648 section 5 (`+` to `-`, `/` to `_`) and drops the `=` padding. Chunks at `0x8000` bytes because `String.fromCharCode.apply` blows the argument limit around 100k |
+| `decode(b64)` | `b64: string` | `{ ok: true, text }` or `{ ok: false, error }` | Never throws. Strips whitespace, accepts either alphabet regardless of how the input was produced, restores dropped padding, then decodes with `TextDecoder("utf-8", { fatal: true })` so that non-UTF-8 bytes are reported rather than silently becoming U+FFFD |
+
+**`js/jsonformatter.js`** attaches one global, `window.jsonFormatter`. Parsing is
+`JSON.parse`; locating the failure is a scanner in this module, for the reason recorded
+in the v1.4.0 milestone:
+
+| Function | Parameters | Returns | Behaviour |
+|----------|-----------|---------|-----------|
+| `check(text)` | `text: string` | `{ ok: true, value }` or `{ ok: false, message, at }` | `message` is the engine's own wording. `at` is `{ line, column, offset, text }`, all 1-based except `offset`, or `null` if the position could not be recovered |
+| `format(text, indent)` | `text: string`, `indent: number` default `2` | `{ ok, out }` or the failure from `check` | |
+| `minify(text)` | `text: string` | `{ ok, out }` or failure | |
+| `sorted(text, indent)` | `text: string`, `indent: number` | `{ ok, out }` or failure | Sorts object keys at every depth. Array order is left alone, because the order of an array is data |
+| `stats(value)` | a parsed value | `{ objects, arrays, keys, values, depth }` | Counts every node |
+
+The scanner is private. It is a recursive descent over RFC 8259 that reports the offset
+of the first thing not valid at that point, and it answers only "where", never "what".
+It carries a 512 level depth cap so that hostile input surfaces as a located parse
+failure rather than escaping as a `RangeError`.
+
+**`js/passwordgenerator.js`** attaches one global, `window.passwordGenerator`:
+
+| Function | Parameters | Returns | Behaviour |
+|----------|-----------|---------|-----------|
+| `SETS` | constant | object | `lower`, `upper`, `digits`, `symbols` |
+| `poolFor(opts)` | `opts` | `string` | Concatenates the selected sets, then removes `I l 1 O 0 o` if `noAmbiguous` |
+| `generate(opts)` | `opts` | `{ ok: true, password, poolSize, length }` or `{ ok: false, error }` | `length` is clamped to 4 to 128. Fails only when no character set is selected |
+| `entropy(length, poolSize)` | two numbers | `number` of bits | `length * log2(poolSize)`, rounded |
+| `strength(bits)` | `bits: number` | `{ label, level }` | Weak, Fair, Strong, Very strong, Overkill at 45, 60, 80, 128 |
+
+Two properties matter more than the API shape. Randomness is `crypto.getRandomValues`
+and never `Math.random`, which is not a cryptographic source and is predictable from
+enough samples. Index selection uses rejection sampling rather than `value % max`,
+because the modulo is biased toward low indices whenever `max` does not divide 256, and
+for a password generator that bias is a real reduction in strength.
+
+`entropy` measures the generator, not the string. It is the right number for a password
+this tool produced and the wrong number for one a human chose.
+
+**`js/timestampconverter.js`** attaches one global, `window.timestampConverter`. This is
+the one tool module allowed to hold `Date` objects, because converting between an instant
+and its representations is the entire job. The rule it keeps instead is that an instant
+is milliseconds since the epoch internally, and the unit question is settled once at the
+boundary:
+
+| Function | Parameters | Returns | Behaviour |
+|----------|-----------|---------|-----------|
+| `detectUnit(n)` | `n: number` | `"s"`, `"ms"` or `"us"` | By magnitude: `>= 1e14` microseconds, `>= 1e11` milliseconds, else seconds |
+| `fromNumber(raw, unit)` | `raw: string\|number`, `unit` optional | result object or `{ ok: false, error }` | Accepts commas, underscores and spaces as separators. Rejects `abs(ms) > 8.64e15`, the range a `Date` can represent, rather than returning an `Invalid Date` that would render as that literal string. `guessed` reports whether the unit was inferred |
+| `fromLocalInput(value)` | `value: string` | result object | Reads a `datetime-local` value as local time, which is what a person typing into the picker means |
+| `relative(ms, nowMs)` | two numbers | `string` | `"3 days ago"`, `"in 1 minute"` |
+| `now()` | none | result object | |
+
+A successful result carries `unit`, `guessed`, `millis`, `seconds`, `iso`, `utc`,
+`local`, `offset`, and `relative`. `offset` is written the way a person reads it
+(`UTC+01:00`), not the inverted sign `getTimezoneOffset` returns.
+
 ### State management
 
 State is entirely local to a page. There is no shared runtime state, no store, no event
@@ -1113,7 +1308,7 @@ outbound links; no data is passed to them and no code is loaded from them.
 | Total page weight, any page | Under 100KB uncompressed | Met. Heaviest page is 31KB |
 | Lighthouse Performance | 90 or above | Not measured |
 | First Contentful Paint | Under 1.0s | Not measured |
-| Render-blocking resources | CSS in `<head>`, all JS at the end of `<body>` | Met on all five pages |
+| Render-blocking resources | CSS in `<head>`, all JS at the end of `<body>` | Met on all eleven pages |
 | External font requests | Zero | Met. System font stacks only |
 | Third-party scripts | Zero | Met |
 | Images shipped with the site | Zero | Met. Every icon is inline SVG or a data URI |
@@ -1126,15 +1321,15 @@ outbound links; no data is passed to them and no code is loaded from them.
 |------|---------------|-----------------|
 | Markdown code-span sentinel | `js/markdown.js` uses a literal NUL character (`"\0"`, embedded as a raw byte in the source) as the placeholder that protects inline code from the inline formatting rules | Use a long random string that cannot appear in user text. The NUL byte makes the file report as binary to some tools, which is why `grep` treats `markdown.js` as a binary file |
 | Image `src` not protocol-checked | Markdown links are whitelisted to safe protocols; image sources are only attribute-escaped | Apply the same whitelist to `src` |
-| Page chrome now spans two files | The topbar markup is copy-pasted into five HTML files and its behaviour lives in `common.js`. v1.1.0 widened that markup with a button and a `<nav>`, so a navigation change is now five HTML edits plus one JavaScript edit that must stay in step | Unchanged by the tenets: a build step would fix it and break tenet 3. The mitigation is that all behaviour went into `common.js` rather than into five inline scripts, so only the markup is duplicated |
+| Page chrome now spans two files | The topbar markup is copy-pasted into eleven HTML files and its behaviour lives in `common.js`. v1.1.0 widened that markup with a button and a `<nav>`, so a navigation change is now eleven HTML edits plus one JavaScript edit that must stay in step | Unchanged by the tenets: a build step would fix it and break tenet 3. The mitigation is that all behaviour went into `common.js` rather than into eleven inline scripts, so only the markup is duplicated. v1.4.0 moved the footer year setter the same way, for the same reason |
 | Collection storage has a ceiling | The Bookmark Manager stores the whole tree as JSON in `localStorage`, which gives roughly 5MB per origin. A large collection can hit it. The write is wrapped and toasts on failure, so an edit is never lost silently, but the ceiling is real | IndexedDB, which has no practical limit. It is a new API surface for this codebase and was not worth adding before anyone has hit the limit |
 | Theme flash | `common.js` loads at the end of `<body>` while `<html>` hardcodes `data-theme="light"` | Move the localStorage read to an inline `<script>` in `<head>` |
 | Silent clipboard failure | `copyText`'s `execCommand` fallback swallows its exception and shows no toast | Toast a failure message in the `catch` |
-| Unguarded `localStorage` writes | None of the three writes is wrapped in `try/catch` | Wrap all three; degrade to non-persistent behaviour instead of throwing. The cost of this grows with every tool that autosaves |
+| Unguarded `localStorage` writes | Of the five keys, only the Bookmark Manager's write is wrapped in `try/catch`. The other four are not | Wrap them all; degrade to non-persistent behaviour instead of throwing. The cost of this grows with every tool that autosaves. The count in this row was "three" until v1.4.0 and had been stale for two releases |
 | Favicon download CORS fallback | When `fetch` fails, falls back to `window.open` and asks the user to right-click | No better fix exists without a proxy server, which tenet 1 forbids. This one is accepted permanently rather than owed |
-| Duplicated page chrome | The topbar, footer, and favicon data URI are copy-pasted into five HTML files. A nav change means five edits, one more with every tool added | A build step or a runtime template would fix it and would break tenet 3. Accepted. The mitigation is the checklist in Working Practice |
+| Duplicated page chrome | The topbar, footer, and favicon data URI are copy-pasted into eleven HTML files. A nav change means eleven edits, one more with every tool added | A build step or a runtime template would fix it and would break tenet 3. Accepted. The mitigation is the checklist in Working Practice. **This cost is now demonstrated rather than theoretical:** the four pages added in v1.4.0 copied the footer markup without the inline script that filled it, and shipped a blank year until a render harness caught it |
 | Inline styles in `index.html` | The about section's layout lives in `style` attributes rather than a class | Move to a named class in `style.css` |
-| No tests of any kind | There is no runner and no runtime to run one | The manual checklist in Working Practice is the substitute. A real fix needs Node, which the constraints forbid |
+| No committed tests | There is no runner and no runtime to run one, and by the rule below, no harness is committed. v1.4.0 ran 295 assertions plus a structural audit over eleven pages, and every one of them was deleted afterwards, so none of it can be re-run by anyone else or by a later session | The manual checklist in Working Practice is the substitute. A real fix needs Node, which the constraints forbid. **Worth reopening as a decision rather than carrying:** the harness technique has now found four real bugs across three releases, and throwing the harnesses away each time means rewriting them each time |
 
 ---
 
@@ -1188,7 +1383,7 @@ and Removal section.
 | CSS leading zeros | Omitted. `.15s`, `.92rem`, `.06em` | Consistent throughout |
 | CSS section markers | Banner comments in a `/* === */` box for major sections, single-line `/* ---- name ---- */` for minor ones | |
 | HTML attribute order | `class`, then `id`, then `href`/`src`, then everything else | Loosely held |
-| Inline SVG | Written inline in HTML with `viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, and a stroke width of 2 (2.5 or 3 for small emphasis icons) | Consistent across all five pages |
+| Inline SVG | Written inline in HTML with `viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, and a stroke width of 2 (2.5 or 3 for small emphasis icons) | Consistent across all eleven pages |
 
 ### Organization
 
@@ -1205,6 +1400,22 @@ and Removal section.
 - **CSS organisation:** one file, ordered tokens, then base, then shared components,
   then one section per tool in the order the tools appear on the landing page, then the
   shared responsive block last.
+
+  > **Discrepancy, unresolved.** The rule above and the file disagree, and the rule is
+  > left as written rather than quietly rewritten to match. `css/style.css` has its
+  > `@media (max-width: 760px)` block at line 662, followed by the Wash Sale Tracker,
+  > Bookmark Manager, and the four v1.4.0 tool sections, then the `.sr-only` and
+  > `.skip-link` utilities, and the `prefers-reduced-motion` block last. So the shared
+  > responsive block is no longer last and has not been since v1.2.0; each newer tool
+  > section carries its own narrow media query instead. The reduced-motion block is
+  > deliberately last and is documented as such, which is a real exception and not the
+  > drift. Two ways to resolve it: move the 760px block back to the end and fold the
+  > per-tool queries into it, or amend the rule to say that each tool section owns its
+  > own responsive rules. The second matches what the code does and localises a tool's
+  > CSS to one place, which is the direction the file has already chosen. **Author's
+  > call, not made here.** Also note the related instruction in "How to add a new tool"
+  > step 5, which says to place a new section "before the final 760px media query" and
+  > is unfollowable as written for the same reason.
 
 ### Comments
 
@@ -1464,6 +1675,12 @@ project that is:
 - `/js/markdown.js`
 - `/js/linkcleaner.js`
 - `/js/charactercounter.js`
+- `/js/washsale.js`
+- `/js/bookmarks.js`
+- `/js/base64encoder.js`
+- `/js/jsonformatter.js`
+- `/js/passwordgenerator.js`
+- `/js/timestampconverter.js`
 - The six `window` globals the shared scripts define, `window.toast`,
   `window.copyText`, `window.mdToHtml`, `window.cleanUrl`, `window.countText`, and
   `window.formatDuration`, because a page in this repository imports them by name across
@@ -2088,7 +2305,8 @@ intent.
 The accessibility pass shipped as v1.0.0 and the two platform items, tool search and
 mobile navigation, shipped as v1.1.0. The direction from here is more tools from the
 Future list, two of which have their own milestones: the Wash Sale Tracker at v1.2.0 and
-the Bookmark Manager at v1.3.0. Explicitly not on the roadmap: accounts, a backend, monetisation, or a
+the Bookmark Manager at v1.3.0, and four smaller tools at v1.4.0. Explicitly not on the
+roadmap: accounts, a backend, monetisation, or a
 framework rewrite. Each of those is excluded by a tenet rather than by preference.
 
 **How is this project maintained?**

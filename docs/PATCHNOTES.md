@@ -5,6 +5,151 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v1.4.0 - 2026-08-31
+
+Four tools from the Future list in one release, taking the site from six hosted tools to
+ten and the landing grid from ten cards to fourteen. Grouped into one milestone because
+each is small, none introduces a new storage key, and all four share one shape: a pure
+module that transforms an input, plus a page that wires it to the DOM.
+
+### Added
+- Added the **Base64 Encoder** at `base64-encoder.html`, with `js/base64encoder.js`
+  exporting `window.base64Encoder`. Encode and decode with full Unicode support, the
+  URL-safe alphabet on output and accepted on input either way, byte and character
+  counts, and a button that feeds the result back in as input
+- Added the **JSON Formatter** at `json-formatter.html`, with `js/jsonformatter.js`
+  exporting `window.jsonFormatter`. Format, minify, deep key sort, selectable indent,
+  document statistics, and parse errors located to a line and column with a caret under
+  the offending character
+- Added the **Password Generator** at `password-generator.html`, with
+  `js/passwordgenerator.js` exporting `window.passwordGenerator`. Four character sets, a
+  look-alike filter, length 4 to 128, and a live entropy and strength meter
+- Added the **Timestamp Converter** at `timestamp-converter.html`, with
+  `js/timestampconverter.js` exporting `window.timestampConverter`. Seconds,
+  milliseconds and microseconds with magnitude-based unit detection and a manual
+  override, local and UTC output side by side, relative phrasing, and per-row copy
+- Added four `.tool-card` entries and four CSS sections, plus a shared `.b64-opt`
+  option-row class used by three of the tools
+- Added the footer year setter to `js/common.js`
+- Added four audit and harness checks: a `label[for]` may not also wrap the control it
+  names, and a render pass now asserts that every page's scripts actually ran
+
+### Decisions recorded
+- **The JSON error locator scans the text rather than reading the engine's error
+  message.** This was the release's one real reversal. The first implementation matched
+  three regexes against `SyntaxError.message` to recover a character offset, and all
+  three missed. V8's current wording for the most common failure is
+  `Unexpected token '}', ..."b": }..." is not valid JSON`, which carries a context
+  snippet and **no offset at all**, and `Unexpected end of JSON input` has never carried
+  one in any version. Error strings are not an API. A recursive descent scanner over RFC
+  8259 is about a hundred lines, is correct on every engine and every version, and
+  locates the cases the engine never located. The engine's wording is still shown,
+  because it is better prose than a reimplementation: **wording from the engine, position
+  from the scanner**
+- **Inline error banners are the project's second feedback channel, and the rule that
+  said there would only ever be one is amended rather than ignored.** Toast reports
+  events, things that happened and are then over. A parse error is a state the user is
+  editing against: it must stay on screen, sit next to the input it refers to, and be
+  re-readable. `DESIGN.md` now states the division and the bar for a fourth channel
+- **"Any timezone" was dropped from the Timestamp Converter**, and file encoding was
+  dropped from the Base64 Encoder. Both are recorded in the Future list with the reason
+  rather than quietly narrowed. A timezone picker needs the IANA database; 400 zones is a
+  different tool from the one being built
+- **`entropy` measures the generator, not the string.** It is the right number for a
+  password this tool produced and the wrong number for one a human chose, and the page
+  says so
+- **Password randomness uses rejection sampling, not `value % max`.** The modulo is
+  biased toward low indices whenever `max` does not divide 256, and for a password
+  generator that bias is a real reduction in strength
+
+### Changed
+- Changed the module names to match their pages. `base64.js`, `jsontool.js`,
+  `password.js`, and `timestamp.js` became `base64encoder.js`, `jsonformatter.js`,
+  `passwordgenerator.js`, and `timestampconverter.js`, with their globals renamed to
+  match. `jsontool.js` was the one that forced the question: "tool" is filler and the
+  name matched no tool. Renamed before the first commit, so no public URL moved
+- Changed the footer year from eight inline copies to one implementation in
+  `js/common.js`. Both `.year` and `#year` are honoured, so no page's markup had to
+  change
+- Changed the landing grid from ten cards to fourteen, and the README from six hosted
+  tools to ten
+- Changed four Future list entries to struck-through, each recording what shipped and
+  what did not
+- Changed the performance file inventory, which was two releases stale
+
+### Fixed
+- **Fixed a blank footer year on all four new pages.** They copied the footer markup
+  without the inline script that filled it, because that script was duplicated per page
+  rather than shared. Caught by a render harness written after the structural audit
+  passed clean, which is the point: the audit parses markup and cannot see a value that
+  is only ever filled in at runtime. The fix moved the behaviour into `common.js` and
+  removed all eight copies
+- Fixed the JSON Formatter's indent `<label>`, which both pointed at the `<select>` and
+  wrapped it. That absorbs the control's own text into its accessible name, so the select
+  announced as "Indent 2 spaces 4 spaces None". The audit only checked for a *missing*
+  name and could not see a bad one; it now checks for this too
+- Fixed the `<output>` element's `for` attribute on the Password Generator, which named
+  only the length slider when five other controls also feed the value
+
+### Removed
+- Removed nothing from the public surface
+
+### Documentation
+- Backfilled `js/washsale.js` and `js/bookmarks.js` into the PRD's API design section.
+  Both shipped in v1.2.0 and v1.3.0 without it, against the project's own "How to add a
+  new tool" step 7. Documenting four more modules on top of that gap would have
+  compounded it
+- Recorded an **unresolved discrepancy** between the CSS organisation rule and the file.
+  The rule says the shared responsive block comes last; it has been at line 662 with six
+  tool sections after it since v1.2.0. The rule is left as written and both resolutions
+  are set out for the author to choose between. The related instruction in "How to add a
+  new tool" step 5 is unfollowable as written for the same reason
+- Refreshed "all five pages" to "all eleven pages" throughout `PRD.md` and `DESIGN.md`,
+  leaving the quoted historical records of past releases with the number that was true
+  when they were written
+- Flagged `css/style.css` as **the number to watch**: it has doubled since the last
+  measurement, from 16,594 to 32,931 bytes, and is now more than half the weight of a
+  cold page load. The previous measurement predicted exactly this. Roughly four more
+  tools would reach the 100KB page target on shared CSS alone
+- Corrected the technical debt row that said three `localStorage` writes are unguarded.
+  There are five keys and only one is guarded, and the count had been stale for two
+  releases
+- Reframed the "No tests of any kind" debt row. It is now "No committed tests", because
+  the harness technique has found four real bugs across three releases and deleting the
+  harnesses each time means rewriting them each time. Flagged as worth reopening
+
+### Verification
+- **88 assertions** against the four modules. Base64: ASCII, empty, accented, emoji, CJK,
+  the URL-safe alphabet in both directions, tolerated whitespace, missing padding, bad
+  characters, bad length, non-UTF-8 bytes reported rather than silently replaced, and a
+  60,000 character round trip. Password: length clamps at both ends, pool composition,
+  the look-alike filter, entropy, strength bands, non-repeatability, and full pool
+  coverage. Timestamp: unit detection at each boundary, the epoch, negative pre-epoch
+  values, separators, the representable range, relative phrasing, and local input
+- **20 of those 88 target the JSON error locator specifically**, because it is the part
+  that was rewritten: line, column, and caret placement, plus the cases the engine gives
+  no offset for at all. Unterminated input, trailing comma, unquoted key, single quotes,
+  a bad escape, a short `\u` escape, `[01]`, a lone minus, trailing junk, an unterminated
+  string, and the 512 level depth cap that stops hostile input escaping as a `RangeError`
+- **75 assertions** against the four pages through their real DOM in an iframe: mode
+  switching and label swapping, the disabled URL-safe control while decoding, error
+  display and recovery, every button, indent selection, caret alignment, slider and
+  checkbox wiring, the no-character-set state, unit override, and the date field writing
+  back to the number field
+- **132 assertions** across all eleven pages for things only visible at runtime: the
+  footer year filled in, both shared helpers present, the theme attribute applied, and
+  the mobile navigation opening and closing with its `aria-expanded` following
+- The structural accessibility audit passes clean on all eleven pages
+- **The clean first run of the page harness was not trusted.** 75 out of 75 on a first
+  run is more likely to mean the harness is not reporting than that the code is perfect,
+  so a deliberately failing assertion was injected to confirm failures surface. It did,
+  and was removed
+- No em dashes in any new or modified file, in any of the three prohibited forms. The one
+  `--` match in `js/jsonformatter.js` is the `depth--` decrement operator
+- All four harnesses deleted before committing, as the rule in `PRD.md` requires
+
+---
+
 ## v1.3.0 - 2026-08-31
 
 The **Bookmark Manager**, the sixth hosted tool and the largest thing built for this

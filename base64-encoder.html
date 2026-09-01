@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base64 Encoder - Azqato's Tools</title>
+  <meta name="description" content="Encode text to Base64 and decode it back, with full Unicode support and a URL-safe variant. Runs entirely in your browser." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="logo">A</span>Azqato's&nbsp;Tools</a>
+      <div class="spacer"></div>
+      <a class="nav-link hide-sm" href="https://azqato.com/">Azqato</a>
+      <a class="nav-link hide-sm" href="https://azqato.com/projects">Projects</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/tools/">Tools</a>
+      <a class="nav-link hide-sm" href="https://azqato.github.io/support.html">Support</a>
+      <button class="icon-btn nav-toggle" id="nav-toggle" aria-label="Menu"
+              aria-expanded="false" aria-controls="nav-menu">
+        <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+    <nav class="nav-menu" id="nav-menu" aria-label="Site" hidden>
+      <a href="https://azqato.com/">Azqato</a>
+      <a href="https://azqato.com/projects">Projects</a>
+      <a href="https://azqato.github.io/tools/">Tools</a>
+      <a href="https://azqato.github.io/support.html">Support</a>
+    </nav>
+  </header>
+
+  <main id="main" class="page wrap">
+    <div class="page-head">
+      <div class="crumb"><a href="index.html">Tools</a> / Base64 Encoder</div>
+      <h1>Base64 Encoder</h1>
+      <p>Encode text to Base64 or decode it back. Accents, emoji and CJK all survive the round trip. Nothing is sent anywhere.</p>
+    </div>
+
+    <div class="b64-modes" role="group" aria-label="Direction">
+      <button class="btn sm primary" id="b64-mode-encode" aria-pressed="true">Encode</button>
+      <button class="btn sm" id="b64-mode-decode" aria-pressed="false">Decode</button>
+    </div>
+
+    <div class="b64-panes">
+      <div class="b64-pane">
+        <label class="lbl" for="b64-input" id="b64-input-label">Text</label>
+        <textarea id="b64-input" class="field" spellcheck="false"
+                  placeholder="Type or paste here"></textarea>
+        <p class="stat-line" id="b64-in-stat"></p>
+      </div>
+      <div class="b64-pane">
+        <p class="lbl" id="b64-output-label">Base64</p>
+        <textarea id="b64-output" class="field" spellcheck="false" readonly
+                  aria-labelledby="b64-output-label"></textarea>
+        <p class="stat-line" id="b64-out-stat"></p>
+      </div>
+    </div>
+
+    <p class="b64-error" id="b64-error" role="alert" hidden></p>
+
+    <div class="b64-actions">
+      <button class="btn primary" id="b64-copy">Copy result</button>
+      <button class="btn" id="b64-swap">Use result as input</button>
+      <button class="btn ghost" id="b64-clear">Clear</button>
+      <label class="b64-opt"><input type="checkbox" id="b64-urlsafe" /> URL-safe alphabet</label>
+    </div>
+
+    <p class="ws-note">The URL-safe variant swaps <code>+</code> and <code>/</code> for
+      <code>-</code> and <code>_</code> and drops the <code>=</code> padding, which is what
+      most URL and filename consumers expect. Decoding accepts either alphabet whichever
+      box it came from.</p>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© <span class="year"></span> Azqato's Tools</span>
+      <div class="spacer"></div>
+      <a href="index.html">Home</a>
+      <span style="color:var(--text-faint)">Your text never leaves your device</span>
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script src="js/base64encoder.js"></script>
+  <script>
+    var mode = "encode";
+    var inp = document.getElementById("b64-input");
+    var out = document.getElementById("b64-output");
+    var inLabel = document.getElementById("b64-input-label");
+    var outLabel = document.getElementById("b64-output-label");
+    var errEl = document.getElementById("b64-error");
+    var inStat = document.getElementById("b64-in-stat");
+    var outStat = document.getElementById("b64-out-stat");
+    var urlSafe = document.getElementById("b64-urlsafe");
+    var encodeBtn = document.getElementById("b64-mode-encode");
+    var decodeBtn = document.getElementById("b64-mode-decode");
+
+    // Byte length rather than character length, because that is the number
+    // that decides whether Base64 output fits a field somewhere.
+    function byteLen(s) { return new TextEncoder().encode(s).length; }
+
+    function run() {
+      var value = inp.value;
+      if (!value) {
+        out.value = "";
+        errEl.hidden = true;
+        inStat.textContent = "";
+        outStat.textContent = "";
+        return;
+      }
+      if (mode === "encode") {
+        var enc = base64Encoder.encode(value, urlSafe.checked);
+        out.value = enc;
+        errEl.hidden = true;
+        inStat.textContent = byteLen(value) + " bytes in";
+        outStat.textContent = enc.length + " characters out";
+      } else {
+        var res = base64Encoder.decode(value);
+        if (res.ok) {
+          out.value = res.text;
+          errEl.hidden = true;
+          inStat.textContent = value.replace(/\s+/g, "").length + " characters in";
+          outStat.textContent = byteLen(res.text) + " bytes out";
+        } else {
+          out.value = "";
+          errEl.textContent = res.error;
+          errEl.hidden = false;
+          inStat.textContent = "";
+          outStat.textContent = "";
+        }
+      }
+    }
+
+    function setMode(next) {
+      mode = next;
+      var encoding = mode === "encode";
+      encodeBtn.classList.toggle("primary", encoding);
+      decodeBtn.classList.toggle("primary", !encoding);
+      encodeBtn.setAttribute("aria-pressed", String(encoding));
+      decodeBtn.setAttribute("aria-pressed", String(!encoding));
+      inLabel.textContent = encoding ? "Text" : "Base64";
+      outLabel.textContent = encoding ? "Base64" : "Text";
+      // The URL-safe switch only describes how output is written. Decoding
+      // accepts both alphabets unconditionally, so the control would be a lie.
+      urlSafe.disabled = !encoding;
+      run();
+    }
+
+    encodeBtn.addEventListener("click", function () { setMode("encode"); });
+    decodeBtn.addEventListener("click", function () { setMode("decode"); });
+    inp.addEventListener("input", run);
+    urlSafe.addEventListener("change", run);
+
+    document.getElementById("b64-copy").addEventListener("click", function () {
+      if (out.value) copyText(out.value, "Result copied");
+      else toast("Nothing to copy yet");
+    });
+
+    document.getElementById("b64-swap").addEventListener("click", function () {
+      if (!out.value) { toast("Nothing to swap in yet"); return; }
+      inp.value = out.value;
+      setMode(mode === "encode" ? "decode" : "encode");
+    });
+
+    document.getElementById("b64-clear").addEventListener("click", function () {
+      inp.value = "";
+      run();
+      inp.focus();
+    });
+
+    setMode("encode");
+  </script>
+</body>
+</html>

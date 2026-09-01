@@ -988,6 +988,255 @@ input[type="date"].field { min-width: 0; }
    Without this the search would hide nothing. Same reason as .nav-menu above. */
 .tool-card[hidden] { display: none; }
 
+/* ---- Base64 Encoder -------------------------------------------------------- */
+.b64-modes { display: flex; gap: 8px; margin-bottom: 18px; }
+
+.b64-panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.b64-pane { min-width: 0; }
+.b64-panes textarea.field {
+  font-family: var(--mono);
+  font-size: .88rem;
+  min-height: 210px;
+  word-break: break-all;
+}
+.b64-panes .stat-line { margin-top: 8px; }
+
+.b64-error {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--danger);
+  background: var(--bg-elev);
+  color: var(--danger);
+  font-size: .9rem;
+}
+
+.b64-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+/* Shared by the checkbox and select rows on three of the four tools added in
+   v1.4.0. It stays under the .b64- prefix because that is where it was first
+   needed, and renaming it would touch four files to no visible end. */
+.b64-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .88rem;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+.b64-opt code {
+  font-family: var(--mono);
+  font-size: .82rem;
+  color: var(--text-faint);
+}
+
+/* ---- JSON Formatter -------------------------------------------------------- */
+.jf-panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.jf-pane { min-width: 0; }
+.jf-panes textarea.field {
+  font-family: var(--mono);
+  font-size: .88rem;
+  min-height: 340px;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+.jf-error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--danger);
+  background: var(--bg-elev);
+}
+.jf-error-msg {
+  margin: 0;
+  color: var(--danger);
+  font-size: .9rem;
+  font-weight: 600;
+}
+/* The caret line only lines up if the glyphs are equal width and the line is
+   not re-wrapped, so this cannot inherit the page font or wrap. */
+.jf-error-line {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+  font-family: var(--mono);
+  font-size: .84rem;
+  color: var(--text-soft);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.jf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+}
+.jf-indent {
+  width: auto;
+  padding: 7px 10px;
+  font-size: .85rem;
+}
+
+/* ---- Password Generator ---------------------------------------------------- */
+.pg-out {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 22px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-sm);
+}
+.pg-value {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  color: var(--text);
+  word-break: break-all;
+  line-height: 1.5;
+}
+.pg-value.empty::before {
+  content: "No character set selected";
+  color: var(--text-faint);
+  font-family: inherit;
+  font-size: .95rem;
+}
+.pg-again { flex: none; }
+
+.pg-meter { margin-top: 14px; }
+.pg-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-inset);
+  overflow: hidden;
+}
+.pg-fill {
+  height: 100%;
+  width: 0;
+  background: var(--danger);
+  transition: width .15s ease, background .15s ease;
+}
+.pg-fill.level-1 { background: #d98a1f; }
+.pg-fill.level-2 { background: var(--success); }
+.pg-fill.level-3, .pg-fill.level-4 { background: var(--accent); }
+
+.pg-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  margin-top: 26px;
+}
+.pg-length-row input[type="range"] { width: 100%; accent-color: var(--accent); }
+.pg-sets {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.pg-sets legend { padding: 0; }
+
+.pg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* ---- Timestamp Converter --------------------------------------------------- */
+.tc-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.tc-field { min-width: 0; }
+.tc-unit { width: auto; flex: none; }
+/* Same reason as the date control on the Wash Sale Tracker: the native widget
+   sizes from its own text and overflows a grid column without this. */
+input[type="datetime-local"].field { min-width: 0; }
+
+.tc-error {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--danger);
+  background: var(--bg-elev);
+  color: var(--danger);
+  font-size: .9rem;
+}
+
+.tc-results { margin-top: 26px; }
+.tc-guess {
+  margin: 0 0 14px;
+  font-size: .85rem;
+  color: var(--text-faint);
+}
+.tc-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-elev);
+}
+.tc-grid dt,
+.tc-grid dd {
+  margin: 0;
+  padding: 11px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.tc-grid dt:first-of-type,
+.tc-grid dt:first-of-type + dd { border-top: 0; }
+.tc-grid dt {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  background: var(--bg-inset);
+}
+.tc-grid dd { gap: 10px; justify-content: space-between; }
+.tc-grid dd span {
+  font-family: var(--mono);
+  font-size: .88rem;
+  word-break: break-all;
+}
+
+@media (max-width: 760px) {
+  .b64-panes,
+  .jf-panes,
+  .pg-controls,
+  .tc-inputs { grid-template-columns: 1fr; }
+  .jf-panes textarea.field { min-height: 220px; }
+  .tc-grid { grid-template-columns: 1fr; }
+  .tc-grid dt { border-top: 1px solid var(--border); }
+  .tc-grid dt:first-of-type + dd { border-top: 1px solid var(--border); }
+}
+
 /* ---- Skip link ------------------------------------------------------------
    First focusable element on every page. Off-screen until focused, so it costs
    sighted users nothing and saves keyboard users the whole topbar. */
