@@ -7,6 +7,32 @@
   <meta name="description" content="A growing collection of free, privacy-first web tools that run entirely in your browser. No sign-up, no servers, no tracking." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b5bf0'/><text x='50' y='71' font-size='62' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>" />
   <link rel="stylesheet" href="css/style.css" />
+  <script>
+    /* Theme, applied before first paint.
+
+       This is the one script in the project that runs in <head>, and it is a
+       deliberate exception to the "all JS at the end of <body>" rule rather than
+       an oversight. common.js cannot fix the flash: by the time a script at the
+       end of <body> runs, the browser has already painted the hardcoded
+       data-theme="light" on <html>, so a dark-theme user sees a white flash on
+       every navigation. Reading localStorage here is the only place early enough.
+
+       Kept deliberately tiny and dependency-free, because it blocks the parser.
+       The try/catch is not decoration: reading localStorage throws outright in
+       some privacy configurations, and an exception here would stop the parser
+       before the stylesheet loads. */
+    (function () {
+      try {
+        var t = localStorage.getItem("azqato-theme");
+        if (!t && window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          t = "dark";
+        }
+        if (t) document.documentElement.setAttribute("data-theme", t);
+      } catch (e) { /* storage unavailable: the light default already applies */ }
+      window.__themeReady = 1;
+    })();
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -43,18 +69,21 @@
     <section class="hero wrap">
       <span class="eyebrow">100% in your browser</span>
       <h1>Free tools that <span class="grad">just work</span>.</h1>
-      <p>A growing collection of handy utilities built with Claude Code. Everything runs
-        locally in your browser: no accounts, no uploads, no servers touching your data.</p>
+      <p>Fourteen utilities for writing, formatting, converting and keeping track of
+        things. Ten run entirely in this browser: no accounts, no uploads, and no server
+        that ever sees what you typed.</p>
       <div class="hero-badges">
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> No sign-up</span>
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> No servers</span>
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Open & private</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Works offline</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Works offline*</span>
       </div>
     </section>
 
     <section class="wrap" id="tools">
       <h2 class="section-label">The tools</h2>
+      <p class="tools-lead">Ten built and hosted here, four Azqato projects hosted
+        elsewhere and marked external. Search to narrow the list.</p>
 
       <div class="tool-search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -197,16 +226,21 @@
       </div>
     </section>
 
-    <section class="wrap" id="about" style="padding: 60px 0;">
-      <div class="card" style="padding: 30px 32px; max-width: 760px; margin: 0 auto;">
-        <h2 class="section-label" style="margin-top:0;">Why these tools?</h2>
-        <p style="margin:0 0 12px; color: var(--text-soft);">
+    <section class="wrap about" id="about">
+      <div class="card about-card">
+        <h2 class="section-label">Why these tools?</h2>
+        <p>
           Most online utilities upload your text, links and files to a server you can't see.
-          These don't. Every tool here is plain HTML, CSS and JavaScript that executes
+          These don't. Every tool hosted here is plain HTML, CSS and JavaScript that executes
           entirely on your device, so your data never leaves the browser tab.
         </p>
-        <p style="margin:0; color: var(--text-soft);">
-          That also means they're fast, free forever, and keep working even with the network off.
+        <p>
+          That also means they're fast, free forever, and keep working with the network off.
+        </p>
+        <p class="about-note">
+          *One exception, stated plainly: the Favicon Downloader has to ask a public icon
+          service for the images, so it needs a connection and that one lookup leaves your
+          device. Every other hosted tool works offline.
         </p>
       </div>
     </section>

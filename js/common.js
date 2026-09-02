@@ -8,11 +8,23 @@
     root.setAttribute("data-theme", theme);
   }
 
-  var saved = localStorage.getItem(KEY);
-  if (saved) {
-    apply(saved);
-  } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-    apply("dark");
+  /* The initial read moved into an inline <head> script in v1.4.1, because
+     this file loads at the end of <body> and by then the hardcoded
+     data-theme="light" has already painted. `__themeReady` is the flag that
+     script sets. The branch below is a fallback for a page that somehow lacks
+     it: the theme would be wrong rather than merely late, which is worse than a
+     flash. The audit harness asserts the inline script is present on every page,
+     so this should never run. */
+  if (!window.__themeReady) {
+    try {
+      var saved = localStorage.getItem(KEY);
+      if (saved) {
+        apply(saved);
+      } else if (window.matchMedia &&
+                 window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        apply("dark");
+      }
+    } catch (e) { /* storage unavailable: keep the light default */ }
   }
 
   document.addEventListener("click", function (e) {
@@ -20,7 +32,13 @@
     if (!t) return;
     var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
     apply(next);
-    localStorage.setItem(KEY, next);
+    // The theme still changes if this throws. Persisting is the part that
+    // fails, so the toast says exactly that rather than implying nothing worked.
+    try {
+      localStorage.setItem(KEY, next);
+    } catch (e) {
+      window.toast("Theme changed, but it couldn't be saved for next time");
+    }
   });
 
   // --- Mobile navigation -------------------------------------------------
@@ -97,8 +115,15 @@
       ta.style.opacity = "0";
       document.body.appendChild(ta);
       ta.select();
-      try { document.execCommand("copy"); done(); } catch (e) {}
+      /* execCommand returns false rather than throwing on some engines, so
+         both outcomes have to be handled. Before v1.4.1 the exception was
+         swallowed and nothing was shown at all, so a failed copy looked
+         identical to a successful one and the user pasted stale content. */
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
       document.body.removeChild(ta);
+      if (ok) done();
+      else window.toast("Couldn't copy. Select the text and press Ctrl+C");
     }
   };
   /* --- Footer year --------------------------------------------------------

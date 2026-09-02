@@ -351,6 +351,7 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 | v1.2.0 - Wash Sale Tracker | 2026-08-31 | Complete |
 | v1.3.0 - Bookmark Manager | 2026-08-31 | Complete |
 | v1.4.0 - Small tools batch, four Future items | 2026-08-31 | Complete |
+| v1.4.1 - Technical debt paydown | 2026-09-01 | Complete |
 
 > **Resolved in v1.0.0.** This table used to carry a row reading "v1.0.0 - Public
 > deployment to GitHub Pages, Complete" while the changelog was still at v0.1.x, so the
@@ -377,6 +378,37 @@ focus now is adding tools and closing the accessibility gaps recorded in `DESIGN
 - One or two further tools from the Future list, exact tools not yet chosen
 - Landing page copy revisit once the grid exceeds eight cards. **Overdue:** the grid
   reached fourteen cards in v1.4.0 and the copy has not been revisited
+
+### v1.4.1 Technical debt paydown, complete 2026-09-01
+
+No new tools and no new features. Six items taken off the backlog, five of them rows in
+the technical debt table. It gets a milestone because the work touched every page in the
+project and changed one standing convention.
+
+**Scope:**
+
+- Theme flash, silent clipboard failure, unguarded `localStorage` writes, the Markdown
+  image `src` whitelist, `index.html` inline styles, and the landing page copy revisit
+
+**Decisions recorded:**
+
+- **`<head>` gets one script, and only this one.** The "all JS at the end of `<body>`"
+  rule and a flash-free theme cannot both hold, because a script at the end of `<body>`
+  runs after the browser has already painted. The rule now names its exception and the
+  four constraints that keep it narrow. See Organization.
+- **Open question 7 is answered yes, with a difference.** Image sources get a whitelist,
+  but not the identical one links get. See Security.
+- **A latched warning, not a toast per keystroke.** The draft autosaves run on every
+  keypress, so wrapping them in a bare `try/catch` with a toast would have turned a full
+  quota into a toast storm. The warning is said once and re-arms only after a save
+  succeeds.
+- **The landing copy now states the offline exception rather than implying there is
+  none.** The hero badge said "Works offline" flatly while the Favicon Downloader needs a
+  connection. It is now marked and explained in the about card. Tenet 5 asks the footer
+  to tell the truth about where data goes; the hero is not exempt from that.
+
+**Not in scope:** the CSS organisation discrepancy and the `style.css` weight question,
+both still open for the author. Neither is a bug and both are decisions.
 
 ### v1.4.0 Small tools batch, complete 2026-08-31
 
@@ -1320,16 +1352,30 @@ outbound links; no data is passed to them and no code is loaded from them.
 | Item | Shortcut taken | Correct solution |
 |------|---------------|-----------------|
 | Markdown code-span sentinel | `js/markdown.js` uses a literal NUL character (`"\0"`, embedded as a raw byte in the source) as the placeholder that protects inline code from the inline formatting rules | Use a long random string that cannot appear in user text. The NUL byte makes the file report as binary to some tools, which is why `grep` treats `markdown.js` as a binary file |
-| Image `src` not protocol-checked | Markdown links are whitelisted to safe protocols; image sources are only attribute-escaped | Apply the same whitelist to `src` |
 | Page chrome now spans two files | The topbar markup is copy-pasted into eleven HTML files and its behaviour lives in `common.js`. v1.1.0 widened that markup with a button and a `<nav>`, so a navigation change is now eleven HTML edits plus one JavaScript edit that must stay in step | Unchanged by the tenets: a build step would fix it and break tenet 3. The mitigation is that all behaviour went into `common.js` rather than into eleven inline scripts, so only the markup is duplicated. v1.4.0 moved the footer year setter the same way, for the same reason |
 | Collection storage has a ceiling | The Bookmark Manager stores the whole tree as JSON in `localStorage`, which gives roughly 5MB per origin. A large collection can hit it. The write is wrapped and toasts on failure, so an edit is never lost silently, but the ceiling is real | IndexedDB, which has no practical limit. It is a new API surface for this codebase and was not worth adding before anyone has hit the limit |
-| Theme flash | `common.js` loads at the end of `<body>` while `<html>` hardcodes `data-theme="light"` | Move the localStorage read to an inline `<script>` in `<head>` |
-| Silent clipboard failure | `copyText`'s `execCommand` fallback swallows its exception and shows no toast | Toast a failure message in the `catch` |
-| Unguarded `localStorage` writes | Of the five keys, only the Bookmark Manager's write is wrapped in `try/catch`. The other four are not | Wrap them all; degrade to non-persistent behaviour instead of throwing. The cost of this grows with every tool that autosaves. The count in this row was "three" until v1.4.0 and had been stale for two releases |
 | Favicon download CORS fallback | When `fetch` fails, falls back to `window.open` and asks the user to right-click | No better fix exists without a proxy server, which tenet 1 forbids. This one is accepted permanently rather than owed |
 | Duplicated page chrome | The topbar, footer, and favicon data URI are copy-pasted into eleven HTML files. A nav change means eleven edits, one more with every tool added | A build step or a runtime template would fix it and would break tenet 3. Accepted. The mitigation is the checklist in Working Practice. **This cost is now demonstrated rather than theoretical:** the four pages added in v1.4.0 copied the footer markup without the inline script that filled it, and shipped a blank year until a render harness caught it |
-| Inline styles in `index.html` | The about section's layout lives in `style` attributes rather than a class | Move to a named class in `style.css` |
 | No committed tests | There is no runner and no runtime to run one, and by the rule below, no harness is committed. v1.4.0 ran 295 assertions plus a structural audit over eleven pages, and every one of them was deleted afterwards, so none of it can be re-run by anyone else or by a later session | The manual checklist in Working Practice is the substitute. A real fix needs Node, which the constraints forbid. **Worth reopening as a decision rather than carrying:** the harness technique has now found four real bugs across three releases, and throwing the harnesses away each time means rewriting them each time |
+
+**Cleared in v1.4.1.** Five rows left this table in one release. They are listed here
+rather than deleted without trace, because a debt table that only ever grows tells you
+nothing about whether the debt is being paid.
+
+| Item | How it was resolved |
+|------|--------------------|
+| Theme flash | The `localStorage` read moved into an inline `<script>` in `<head>` on all eleven pages. `common.js` keeps a fallback behind a `__themeReady` flag, and the audit harness asserts the inline script is present, so the fallback should never run |
+| Silent clipboard failure | The `execCommand` fallback now handles both outcomes. It returns `false` rather than throwing on some engines, so catching the exception alone would still have failed silently on those |
+| Unguarded `localStorage` writes | All five writes are wrapped. The two draft autosaves needed more than a `try/catch`: they run on every keystroke, so the warning is latched and re-arms only after a save succeeds, otherwise a full quota would toast on every key |
+| Image `src` not protocol-checked | Answered as open question 7 and implemented. See Security |
+| Inline styles in `index.html` | The about section uses `.about`, `.about-card`, and `.about-note` |
+
+> **A correction to the row this table carried in v1.4.0.** It said only the Bookmark
+> Manager's write was wrapped and the other four were not. That was wrong: the Wash Sale
+> Tracker's write had been wrapped since v1.2.0, so the real count was three unguarded,
+> not four. The v1.4.0 row was itself written while correcting a stale count, which is a
+> good argument for reading the code rather than the previous row.
+
 
 ---
 
@@ -1396,7 +1442,20 @@ and Removal section.
   bottom of the tool's HTML file. Both tool-specific JS files follow this split
   precisely: neither touches the DOM, and both are pure functions over strings.
 - **Script order:** `js/common.js` first, then any tool library, then the inline glue
-  script. Always at the end of `<body>`, never in `<head>`, never `defer` or `async`.
+  script. Always at the end of `<body>`, never `defer` or `async`.
+
+  **One deliberate exception, added in v1.4.1:** a small inline theme script in `<head>`,
+  present on every page. It is there because the rule and the goal genuinely conflict.
+  A script at the end of `<body>` cannot prevent a theme flash: by the time it runs the
+  browser has already painted the hardcoded `data-theme="light"` on `<html>`, so a
+  dark-theme user sees a white flash on every navigation. Reading `localStorage` in
+  `<head>` is the only place early enough.
+
+  The exception is kept narrow and should stay that way. It is inline rather than a file
+  so it costs no request, it is a few lines because it blocks the parser, it touches
+  nothing but `data-theme`, and it is wrapped in `try/catch` because reading
+  `localStorage` throws outright in some privacy configurations and an exception there
+  would stop the parser before the stylesheet loads. **Nothing else belongs in `<head>`.**
 - **CSS organisation:** one file, ordered tokens, then base, then shared components,
   then one section per tool in the order the tools appear on the landing page, then the
   shared responsive block last.
@@ -1610,7 +1669,7 @@ passed in the URL.
 |------|------|--------------------|
 | Markdown preview writes to `innerHTML` | Script injection through crafted Markdown | Every input string passes `escapeHtml()` before any parsing, and raw HTML passthrough is not implemented. A `<script>` in the source renders as visible text |
 | Markdown link hrefs | `javascript:` URLs in links | Whitelist `^(https?:\|mailto:\|#\|\/\|\.)`, anything else becomes `#`. Every link also gets `rel="noopener noreferrer"` |
-| Markdown image sources | `javascript:` or `data:` in `src` | Attribute-escaped but **not** whitelisted. This is a gap relative to links. Practical risk is low (no modern browser executes `javascript:` in `src`, and a `data:` image is inert) but the asymmetry is unintended. Recorded as technical debt |
+| Markdown image sources | `javascript:` or a non-image `data:` in `src` | Whitelisted since v1.4.1: `^(https?:\|data:image/\|/\|\.)`, anything else becomes `#`. Deliberately not the identical list to links, because `mailto:` and `#` are meaningless for an image while `data:image/` is legitimate and safe here. `<img>` is a scriptless context, so an SVG loaded through it cannot run script even if it contains a `<script>` element |
 | Link Cleaner URL parsing | Malformed or hostile input | `new URL()` inside `try/catch`; failure returns `{ valid: false }`. Output is written with `textContent`, never `innerHTML` |
 | Link Cleaner "Open link" button | Opening an attacker-supplied URL | `window.open(current, "_blank", "noopener")`. The URL is one the user themselves pasted |
 | Favicon domain input | Injection into the outbound URL | `normalizeDomain()` validates against `^[a-z0-9.-]+\.[a-z]{2,}$` and the value is passed through `encodeURIComponent` when building the gstatic URL |
@@ -1870,8 +1929,15 @@ into the relevant section and mark it answered here rather than deleting it.
 6. **Generic parameter names:** `amp`, `spm`, `scm`, and `trk` will strip parameters
    some sites use legitimately. Is that the right default, or should they move behind a
    future "aggressive mode" toggle?
-7. **The Markdown image `src` whitelist:** should image sources get the same protocol
-   whitelist as links, for symmetry, even though the practical risk is low?
+7. **The Markdown image `src` whitelist:** ~~should image sources get the same protocol
+   whitelist as links, for symmetry, even though the practical risk is low?~~
+   **Answered 2026-09-01: yes, with one deliberate difference.** Images now get a
+   whitelist, but not the identical one. `mailto:` and `#` are meaningless for an image
+   and are excluded; `data:image/` is included, because an inline image is legitimate and
+   `<img>` is a scriptless context, so an SVG loaded through it cannot execute script
+   even if it contains a `<script>` element. Anything else becomes `#`, matching the link
+   fallback. The alt text is preserved either way, so a blocked image still says what it
+   was. Folded into Security and the technical debt table.
 8. **Analytics:** the entire Metrics section is aspirational until something measures
    it. Is a privacy-respecting analytics tool (Plausible or similar) acceptable under
    tenet 1, given it would send a page view to a third party?

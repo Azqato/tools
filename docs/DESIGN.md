@@ -1,6 +1,6 @@
 # Design System - Azqato's Tools
 
-**Last verified against the code:** 2026-08-31 for v1.4.0 (`css/style.css`, 1273 lines, ~32.2KB)
+**Last verified against the code:** 2026-09-01 for v1.4.1 (`css/style.css`, 1306 lines, ~33.1KB)
 
 Every value in this document was read out of `css/style.css` or the eleven HTML pages
 rather than inferred. Where the code and an earlier version of this document
@@ -444,6 +444,31 @@ has to earn.
 >
 > Verified by a structural audit that parses all five pages and asserts every
 > `input`, `textarea`, and `select` resolves to an accessible name. All five pass.
+
+### Theme application
+
+The theme is applied by an inline `<script>` in `<head>`, before the browser paints. This
+is the only `<head>` script in the project.
+
+It has to be there. `<html>` ships with `data-theme="light"` hardcoded so the page is
+styled even with JavaScript off, and `common.js` loads at the end of `<body>`. A theme
+read at that point is a repaint, not an initialisation: a dark-theme user sees a white
+flash on every single navigation. The flash was a known gap from v0.1.0 and was closed in
+v1.4.1.
+
+Three rules for anyone touching it:
+
+- **Keep it tiny.** It blocks the parser, so it earns its place by being a few lines.
+- **Keep it wrapped.** Reading `localStorage` throws outright in some privacy
+  configurations, and an uncaught exception there stops the parser before the stylesheet
+  loads, which is a far worse failure than a flash.
+- **Do not put anything else in `<head>`.** The exception is for the one thing that
+  provably cannot work anywhere else.
+
+`common.js` still owns the toggle and persistence, and keeps a fallback behind the
+`__themeReady` flag the inline script sets. The audit harness asserts the inline script
+is present on every page and absent from every `<body>`, so the fallback is a safety net
+rather than a path anything relies on.
 
 ### Toast notifications
 

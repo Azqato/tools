@@ -5,6 +5,113 @@ Format: semantic versioning (`MAJOR.MINOR.PATCH`), date `YYYY-MM-DD`, sections: 
 
 ---
 
+## v1.4.1 - 2026-09-01
+
+No new tools. Six backlog items, five of them rows in the technical debt table, which is
+now shorter than it was for the first time in the project's history.
+
+### Fixed
+- **Fixed the theme flash**, a known gap since v0.1.0. `<html>` ships with
+  `data-theme="light"` hardcoded and `common.js` loads at the end of `<body>`, so a
+  dark-theme user saw a white flash on every navigation. The `localStorage` read moved
+  into an inline `<script>` in `<head>` on all eleven pages, which is the only place
+  early enough to run before the first paint
+- **Fixed the silent clipboard failure.** `copyText`'s `execCommand` fallback swallowed
+  its exception and showed nothing, so a failed copy looked exactly like a successful one
+  and the user pasted stale content. It now reports failure and says what to do instead.
+  **Catching the exception alone would not have been enough:** `execCommand` returns
+  `false` rather than throwing on some engines, so both outcomes are handled
+- **Fixed the three unguarded `localStorage` writes.** All five keys are now wrapped
+- **Fixed the Markdown image `src` gap.** Links had been protocol-whitelisted since
+  v0.1.0 and images had not
+- **Fixed the landing page hero overstating the offline claim.** The "Works offline"
+  badge was flat while the Favicon Downloader needs a connection. It is now marked and
+  the exception is stated plainly in the about card
+
+### Changed
+- Changed `index.html`'s about section from inline `style` attributes to `.about`,
+  `.about-card`, and `.about-note`. An inline style cannot respond to a breakpoint or a
+  theme, and it is invisible to anyone reading the stylesheet to find out how the page
+  is built
+- Changed the landing page copy, whose revisit trigger in `PRD.md` was "once the grid
+  exceeds eight cards". It was at fourteen. The hero no longer says "a growing
+  collection", which was written when there were five tools, and the tools section now
+  states how many are hosted here versus linked
+
+### Decisions recorded
+- **`<head>` gets exactly one script, and this is it.** The "all JS at the end of
+  `<body>`" rule and a flash-free theme cannot both hold, because a script at the end of
+  `<body>` runs after the browser has already painted. The rule in `PRD.md` now names its
+  exception and the four constraints that keep it narrow: inline so it costs no request,
+  a few lines because it blocks the parser, touching nothing but `data-theme`, and
+  wrapped in `try/catch` because reading `localStorage` throws outright in some privacy
+  configurations, where an uncaught exception would stop the parser before the stylesheet
+  loads. That failure would be far worse than the flash it was added to fix
+- **Open question 7 answered yes, with one deliberate difference.** Image sources get a
+  whitelist but not the identical one links get. `mailto:` and `#` are meaningless for an
+  image and are excluded; `data:image/` is included, because an inline image is
+  legitimate and `<img>` is a scriptless context, so an SVG loaded through it cannot run
+  script even if it contains a `<script>` element. Alt text survives either way, so a
+  blocked image still says what it was
+- **A latched warning, not a toast per keystroke.** The two draft autosaves fire on every
+  keypress. A bare `try/catch` with a toast would have turned a full quota into a toast
+  storm, which is a worse experience than the silent failure it replaced. The warning is
+  said once and re-arms only after a save succeeds, so a user who frees up space is
+  warned again if it fills a second time
+- **The theme still changes when it cannot be saved.** The toast says the change did not
+  persist rather than implying nothing happened, because the visible thing the user asked
+  for did in fact work
+
+### Documentation
+- **Corrected an error introduced in v1.4.0.** The technical debt table said only the
+  Bookmark Manager's `localStorage` write was wrapped and the other four were not. The
+  Wash Sale Tracker's had been wrapped since v1.2.0, so the real count was three
+  unguarded, not four. That row was itself written while correcting a stale count, which
+  is a good argument for reading the code rather than the previous row
+- Added a "Cleared in v1.4.1" table listing the five rows that left the debt table,
+  rather than deleting them without trace. A debt table that only ever grows says nothing
+  about whether the debt is being paid
+- Added a "Theme application" section to `DESIGN.md` with the three rules for anyone
+  touching the inline script
+- Updated the Security attack surface entry for image sources from a recorded gap to the
+  implemented whitelist
+
+### Added
+- Added three audit checks: every page must carry the inline theme script, no page may
+  have it in `<body>` where it would be too late, and `index.html` may not carry inline
+  style attributes inside `<main>`
+
+### Removed
+- Removed nothing from the public surface
+
+### Verification
+- **74 assertions** against the six changes. The theme script present in `<head>` and
+  absent from `<body>` on all eleven pages, a stored theme applied before paint, the
+  toggle round trip, and a dark theme surviving navigation to a fresh page. Clipboard
+  failure by return value and by exception, and success still reporting success. Storage
+  quota failure on both drafts and on the theme write, including the latch holding across
+  20 further keystrokes and re-arming after a success. Twelve image and link whitelist
+  cases including `JaVaScRiPt:`, a non-image `data:` URI, and `vbscript:`, plus alt text
+  surviving a blocked image
+- **143 assertions** across all eleven pages for runtime state, and the structural audit
+  clean on all eleven
+- **Two harness bugs, both mine, both worth recording.** The theme test asserted a light
+  starting state, but headless Edge reports `prefers-color-scheme: dark`, so it was
+  testing the harness's environment rather than the code; it now pins a known value
+  first. The clipboard test assigned `navigator.clipboard = undefined` to force the
+  fallback, but that is a read-only accessor on the prototype, so the assignment silently
+  did nothing and the async path ran while the assertions checked synchronously.
+  `Object.defineProperty` shadows it properly, and the test now asserts the fallback path
+  was actually forced before relying on it
+- **The regression risk in this release was `js/markdown.js`**, which contains a raw NUL
+  byte as its code-span sentinel. The edit script asserts the sentinel is present before
+  writing and still present afterwards, and there is a test that a code span still
+  suppresses inline formatting
+- No em dashes in any modified file, in any of the three prohibited forms
+- All three harnesses deleted before committing
+
+---
+
 ## v1.4.0 - 2026-08-31
 
 Four tools from the Future list in one release, taking the site from six hosted tools to
